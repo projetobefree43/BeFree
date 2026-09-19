@@ -1,20 +1,18 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+// essa é a tela de Conquistas. aqui o usuário vê seu progresso
+// e as metas que pode alcançar usando o app (tipo "7 dias seguidos",
+// "30 dias de vitórias"). é uma forma de gamificação pra motivar.
+
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { AnimatedScreen } from "../components/animated-screen";
+import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 
-// Tela de Conquistas - Gamificação e progresso do usuário
 export default function Achievements() {
   const router = useRouter();
 
-  // Lista de badges/conquistas alcançáveis (pode vir de um banco de dados)
+  // lista de conquistas que o usuário pode desbloquear
   const achievements = [
     {
       id: 1,
@@ -32,91 +30,61 @@ export default function Achievements() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header com botão de voltar e título */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={COLORS.primaryDark}
-            style={styles.backButton}
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>Conquistas</Text>
-      </View>
+    <AnimatedScreen>
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Conquistas" onBackPress={() => router.back()} />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Descrição da seção */}
-        <Text style={styles.subtitle}>Gamificação & Metas</Text>
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.subtitle}>Gamificação & Metas</Text>
 
-        {/* Barra de progresso do usuário */}
-        <View style={styles.progressBox}>
-          <Text style={styles.progressLabel}>Progresso: 40%</Text>
-          <View style={styles.progressBar}>
-            {/* Barra preenchida dinamicamente */}
-            <View style={[styles.progressFill, { width: "40%" }]} />
-          </View>
-        </View>
-
-        {/* Lista de conquistas renderizadas dinamicamente */}
-        {achievements.map((achievement) => (
-          <View key={achievement.id} style={styles.achievementCard}>
-            {/* Ícone da conquista em dourado */}
-            <MaterialCommunityIcons
-              name={achievement.icon}
-              size={40}
-              color={COLORS.warning}
-            />
-            {/* Informações da conquista */}
-            <View style={styles.achievementInfo}>
-              <Text style={styles.achievementTitle}>{achievement.title}</Text>
-              <Text style={styles.achievementDesc}>
-                {achievement.description}
-              </Text>
+          {/* barra de progresso (estática por enquanto) */}
+          <View style={styles.progressBox}>
+            <Text style={styles.progressLabel}>Progresso: 40%</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: "40%" }]} />
             </View>
           </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+
+          {/* lista de conquistas */}
+          {achievements.map((achievement) => (
+            <View key={achievement.id} style={styles.achievementCard}>
+              <MaterialCommunityIcons
+                name={achievement.icon}
+                size={40}
+                color={COLORS.warning}
+              />
+              <View style={styles.achievementInfo}>
+                <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                <Text style={styles.achievementDesc}>
+                  {achievement.description}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    </AnimatedScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  // Fundo e layout principal
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  // Header com título
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.white,
-  },
-  backButton: {
-    marginRight: SPACING.md,
-  },
-  title: {
-    fontSize: FONT_SIZES.xlarge,
-    fontWeight: "bold",
-    color: COLORS.primaryDark,
-  },
   content: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
   },
   subtitle: {
     fontSize: FONT_SIZES.medium,
     color: COLORS.textGray,
     marginBottom: SPACING.xl,
   },
-  // Caixa com barra de progresso
   progressBox: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: SPACING.lg,
     marginBottom: SPACING.xxl,
   },
@@ -126,23 +94,21 @@ const styles = StyleSheet.create({
     color: COLORS.primaryDark,
     marginBottom: SPACING.md,
   },
-  // Barra de progresso visual
   progressBar: {
-    height: 8,
+    height: 10,
     backgroundColor: "#E0E0E0",
-    borderRadius: 4,
+    borderRadius: 5,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.success,
   },
-  // Card individual de conquista
   achievementCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },

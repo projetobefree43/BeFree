@@ -1,69 +1,260 @@
+// essa é a tela da Rede de Apoio. aqui o usuário cadastra os contatos
+// de pessoas de confiança (família, amigos, terapeuta) que podem ser
+// acionados quando ele precisar de ajuda. ele pode editar e apagar contatos.
+
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+    Alert,
+    Modal,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
+import { AnimatedScreen } from "../components/animated-screen";
+import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import {
+    deleteContact,
+    getContacts,
+    getCurrentUserId,
+    initDatabase,
+    insertContact,
+    updateContact,
+} from "../db";
 
-// Tela de Rede de Apoio - Gerencia contatos de emergência
 export default function Support() {
   const router = useRouter();
+  const [contacts, setContacts] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingContact, setEditingContact] = useState(null);
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
 
-  // Lista de contatos de apoio (pode vir de um banco de dados)
-  const contacts = [
-    { id: 1, name: "Mãe", phone: "(11) 98765-4321" },
-    { id: 2, name: "Melhor Amiga", phone: "(21) 99876-5432" },
-    { id: 3, name: "Terapeuta", phone: "(11) 3456-7890" },
-  ];
+  // carrega os contatos salvos quando a tela aparece
+  useEffect(() => {
+    const loadContacts = async () => {
+      try {
+        await initDatabase();
+        const sessionUserId = await getCurrentUserId();
+        setUserId(sessionUserId);
+        if (sessionUserId) {
+          const rows = await getContacts(sessionUserId);
+          setContacts(rows);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar contatos:", error);
+      }
+    };
+    loadContacts();
+  }, []);
+
+  // abre o modal pra cadastrar um contato novo
+  const openNewContact = () => {
+    setEditingContact(null);
+    setNewName("");
+    setNewPhone("");
+    setModalVisible(true);
+  };
+
+  // abre o modal pra editar um contato existente
+  const openEditContact = (contact) => {
+    setEditingContact(contact);
+    setNewName(contact.name);
+    setNewPhone(contact.phone);
+    setModalVisible(true);
+  };
+
+  // salva o contato (novo ou editado)
+  const handleSaveContact = async () => {
+    const name = newName.trim();
+    const phone = newPhone.trim();
+
+    // os dois campos são obrigatórios
+    if (!name || !phone) {
+      Alert.alert(
+        "Campos obrigatórios",
+        "Preencha o nome e o telefone do contato para continuar."
+      );
+      return;
+    }
+
+    try {
+      await initDatabase();
+      if (!userId) return;
+
+      if (editingContact) {
+        // se tá editando, atualiza o contato que já existe
+        await updateContact(editingContact.id, userId, { name, phone });
+        setContacts(
+          contacts.map((contact) =>
+            contact.id === editingContact.id
+              ? { ...contact, name, phone }
+              : contact
+          )
+        );
+      } else {
+        // se é novo, cria um contato novo
+        const id = await insertContact({ userId, name, phone });
+        setContacts([...contacts, { id, name, phone }]);
+      }
+    } catch (error) {
+      console.error("Erro ao salvar contato:", error);
+    }
+
+    // limpa e fecha o modal
+    setEditingContact(null);
+    setNewName("");
+    setNewPhone("");
+    setModalVisible(false);
+  };
+
+  // pergunta se tem certeza antes de apagar um contato
+  const handleDeleteContact = (contact) => {
+    Alert.alert(
+      "Excluir contato",
+      `Tem certeza que deseja excluir ${contact.name} da sua rede de apoio?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await initDatabase();
+              if (!userId) return;
+              await deleteContact(contact.id, userId);
+              setContacts(
+                contacts.filter((item) => item.id !== contact.id)
+              );
+            } catch (error) {
+              console.error("Erro ao excluir contato:", error);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header com botão de voltar e título */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={COLORS.primaryDark}
-            style={styles.backButton}
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>Rede de Apoio</Text>
-      </View>
+    <AnimatedScreen>
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Rede de Apoio" onBackPress={() => router.back()} />
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.subtitle}>Gestão de contatos</Text>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Descrição da seção */}
-        <Text style={styles.subtitle}>Gestão de contatos</Text>
+          {/* lista de contatos cadastrados */}
+          {contacts.map((contact) => (
+            <View key={contact.id} style={styles.contactCard}>
+              <MaterialCommunityIcons
+                name="account"
+                size={40}
+                color={COLORS.primary}
+              />
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactName}>{contact.name}</Text>
+                <Text style={styles.contactPhone}>{contact.phone}</Text>
+              </View>
+              {/* botão de editar */}
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => openEditContact(contact)}
+              >
+                <Ionicons
+                  name="pencil"
+                  size={20}
+                  color={COLORS.primaryDark}
+                />
+              </TouchableOpacity>
+              {/* botão de apagar */}
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => handleDeleteContact(contact)}
+              >
+                <Ionicons
+                  name="trash-outline"
+                  size={20}
+                  color={COLORS.danger}
+                />
+              </TouchableOpacity>
+            </View>
+          ))}
 
-        {/* Lista de contatos renderizada dinamicamente */}
-        {contacts.map((contact) => (
-          <View key={contact.id} style={styles.contactCard}>
-            {/* Ícone de usuário */}
-            <MaterialCommunityIcons
-              name="account"
-              size={40}
-              color={COLORS.primary}
-            />
-            {/* Dados do contato */}
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactName}>{contact.name}</Text>
-              <Text style={styles.contactPhone}>{contact.phone}</Text>
+          {/* botão pra adicionar contato novo */}
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={openNewContact}
+          >
+            <Ionicons name="add" size={24} color={COLORS.white} />
+            <Text style={styles.addButtonText}>Adicionar Contato</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* modal de cadastro/edição de contato */}
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => {
+            setEditingContact(null);
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>
+                {editingContact ? "Editar Contato" : "Novo Contato"}
+              </Text>
+
+              <Text style={styles.modalLabel}>Nome</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Nome do contato"
+                placeholderTextColor={COLORS.textGray}
+                value={newName}
+                onChangeText={setNewName}
+              />
+
+              <Text style={styles.modalLabel}>Telefone</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="(00) 00000-0000"
+                placeholderTextColor={COLORS.textGray}
+                keyboardType="phone-pad"
+                value={newPhone}
+                onChangeText={setNewPhone}
+              />
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => {
+                    setEditingContact(null);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={handleSaveContact}
+                >
+                  <Text style={styles.modalConfirmText}>
+                    {editingContact ? "Salvar" : "Adicionar"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        ))}
-
-        {/* Botão para adicionar novo contato */}
-        <TouchableOpacity style={styles.addButton}>
-          <Ionicons name="add" size={24} color={COLORS.white} />
-          <Text style={styles.addButtonText}>Adicionar Contato</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </AnimatedScreen>
   );
 }
 
@@ -72,42 +263,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.white,
-  },
-  backButton: {
-    marginRight: SPACING.md,
-  },
-  title: {
-    fontSize: FONT_SIZES.xlarge,
-    fontWeight: "bold",
-    color: COLORS.primaryDark,
-  },
   content: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
   },
   subtitle: {
     fontSize: FONT_SIZES.medium,
     color: COLORS.textGray,
     marginBottom: SPACING.xl,
   },
-  // Card de contato individual
   contactCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
   contactInfo: {
     marginLeft: SPACING.lg,
     flex: 1,
+  },
+  editButton: {
+    padding: SPACING.sm,
   },
   contactName: {
     fontSize: FONT_SIZES.medium,
@@ -119,7 +298,6 @@ const styles = StyleSheet.create({
     color: COLORS.textGray,
     marginTop: SPACING.sm,
   },
-  // Botão para adicionar contato
   addButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -127,12 +305,75 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderRadius: 12,
     paddingVertical: SPACING.lg,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.xl,
+    gap: SPACING.md,
   },
   addButtonText: {
     color: COLORS.white,
     fontSize: FONT_SIZES.medium,
     fontWeight: "bold",
-    marginLeft: SPACING.md,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    paddingHorizontal: SPACING.xxl,
+  },
+  modalCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: SPACING.xl,
+  },
+  modalTitle: {
+    fontSize: FONT_SIZES.xlarge,
+    fontWeight: "bold",
+    color: COLORS.primaryDark,
+    marginBottom: SPACING.xl,
+  },
+  modalLabel: {
+    fontSize: FONT_SIZES.normal,
+    fontWeight: "bold",
+    color: COLORS.primaryDark,
+    marginBottom: SPACING.sm,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 12,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 14,
+    fontSize: FONT_SIZES.medium,
+    backgroundColor: COLORS.white,
+    marginBottom: SPACING.lg,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  modalCancelButton: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: COLORS.primaryDark,
+    borderRadius: 12,
+    paddingVertical: SPACING.lg,
+    alignItems: "center",
+  },
+  modalCancelText: {
+    color: COLORS.primaryDark,
+    fontSize: FONT_SIZES.medium,
+    fontWeight: "bold",
+  },
+  modalConfirmButton: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    paddingVertical: SPACING.lg,
+    alignItems: "center",
+  },
+  modalConfirmText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.medium,
+    fontWeight: "bold",
   },
 });

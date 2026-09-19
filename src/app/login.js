@@ -1,252 +1,257 @@
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+// essa é a tela de login. aqui o usuário digita email e senha pra entrar
+// na conta dele. se os dados estiverem certos, o app salva o id do usuário
+// e manda pra tela principal (home).
+
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { AnimatedButton } from "../components/animated-button";
+import { AnimatedScreen } from "../components/animated-screen";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { getUserByEmail, initDatabase, setSetting } from "../db";
 
-// Tela de Login - Autenticação de usuário
 export default function Login() {
   const router = useRouter();
-  // Estado para o checkbox "Lembrar de mim"
+
+  // "useState" é como o React guarda dados que podem mudar na tela.
+  // aqui a gente guarda o email, a senha, e se o usuário quer ser lembrado
   const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // essa função roda quando o usuário clica no botão "Entrar"
+  const handleLogin = async () => {
+    const emailValue = email.trim().toLowerCase();
+
+    // verifica se os campos foram preenchidos
+    if (!emailValue || !password) {
+      Alert.alert(
+        "Campos obrigatórios",
+        "Preencha o email e a senha para entrar."
+      );
+      return;
+    }
+
+    try {
+      await initDatabase();
+
+      // procura o usuário no banco pelo email
+      const user = await getUserByEmail(emailValue);
+      if (!user) {
+        Alert.alert(
+          "Conta não encontrada",
+          "Este email não está cadastrado. Crie uma conta primeiro."
+        );
+        return;
+      }
+
+      // verifica se a senha bate com a que tá no banco
+      if (user.password !== password) {
+        Alert.alert("Senha incorreta", "Verifique a senha e tente novamente.");
+        return;
+      }
+
+      // se tudo certo, salva o id e nome do usuário como "sessão ativa"
+      // e manda pra tela principal
+      await setSetting("currentUserId", String(user.id));
+      await setSetting("currentUserName", user.name);
+      router.replace("/home");
+    } catch (error) {
+      console.error("Erro ao entrar:", error);
+      Alert.alert("Erro", "Não foi possível entrar. Tente novamente.");
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Botão de voltar */}
-      <TouchableOpacity onPress={() => router.back()}>
-        <Ionicons
-          name="arrow-back"
-          size={24}
-          color={COLORS.primaryDark}
-          style={styles.backButton}
-        />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        {/* Títulos de boas-vindas */}
-        <Text style={styles.title}>Entrar</Text>
-        <Text style={styles.subtitle}>Bom te ter de volta!</Text>
-
-        {/* Campo de Email */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite seu email"
-            placeholderTextColor={COLORS.textGray}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-
-        {/* Campo de Senha */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Senha</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite sua senha"
-            placeholderTextColor={COLORS.textGray}
-            secureTextEntry
-          />
-        </View>
-
-        {/* Opções: Lembrar de mim e Esqueceu a senha? */}
-        <View style={styles.optionsContainer}>
+    <AnimatedScreen>
+      <SafeAreaView style={styles.container}>
+        {/* KeyboardAvoidingView faz o conteúdo subir quando o teclado aparece */}
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          {/* Botão de voltar */}
           <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() => setRememberMe(!rememberMe)}
+            onPress={() => router.back()}
+            style={styles.backBtn}
           >
-            <Ionicons
-              name={rememberMe ? "checkbox" : "square-outline"}
-              size={20}
-              color={COLORS.primary}
+            <Ionicons name="arrow-back" size={24} color={COLORS.primaryDark} />
+          </TouchableOpacity>
+
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Títulos */}
+            <Text style={styles.title}>Entrar</Text>
+            <Text style={styles.subtitle}>Bom te ter de volta!</Text>
+
+            {/* Campo de Email */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite seu email"
+                placeholderTextColor={COLORS.textGray}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+
+            {/* Campo de Senha */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Senha</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite sua senha"
+                placeholderTextColor={COLORS.textGray}
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+
+            {/* Opções: lembrar de mim e esqueceu a senha */}
+            <View style={styles.optionsContainer}>
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => setRememberMe(!rememberMe)}
+              >
+                <Ionicons
+                  name={rememberMe ? "checkbox" : "square-outline"}
+                  size={20}
+                  color={COLORS.primary}
+                />
+                <Text style={styles.checkboxLabel}>Lembrar de mim</Text>
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Botão de Login (usa o AnimatedButton que tem animação de escala) */}
+            <AnimatedButton
+              title="Entrar"
+              onPress={handleLogin}
+              style={styles.button}
             />
-            <Text style={styles.checkboxLabel}>Lembrar de mim</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
-          </TouchableOpacity>
-        </View>
 
-        {/* Botão de login */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/home")}
-        >
-          <Text style={styles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
-
-        {/* Divisor "OU" com linha */}
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>Ou</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        {/* Login com redes sociais */}
-        <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialButton}>
-            <FontAwesome name="google" size={24} color="#EA4335" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <FontAwesome name="facebook" size={24} color="#1877F2" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton}>
-            <FontAwesome name="apple" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Link para criação de conta */}
-        <TouchableOpacity
-          style={styles.footerLink}
-          onPress={() => router.push("/register")}
-        >
-          <Text style={styles.footerText}>
-            Não tem uma conta? <Text style={styles.footerTextBold}>Criar</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+            {/* Link pra ir pra tela de cadastro */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Não tem conta? </Text>
+              <TouchableOpacity onPress={() => router.push("/register")}>
+                <Text style={styles.registerLink}>Cadastre-se</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </AnimatedScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  // Container e background
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.xxxl,
-    paddingVertical: SPACING.xxl,
   },
-  // Botão de voltar
-  backButton: {
-    marginBottom: SPACING.xxl,
-    paddingHorizontal: SPACING.md,
-  },
-  // Área de conteúdo
-  content: {
+  flex: {
     flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: SPACING.md,
   },
-  // Título da página
+  backBtn: {
+    paddingHorizontal: SPACING.xxl,
+    paddingTop: SPACING.lg,
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.xxxl,
+  },
   title: {
     fontSize: FONT_SIZES.xxlarge,
     fontWeight: "bold",
     color: COLORS.primaryDark,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
-  // Subtítulo descritivo
   subtitle: {
     fontSize: FONT_SIZES.medium,
     color: COLORS.textGray,
     marginBottom: SPACING.xxxl,
   },
-  // Grupo de input (label + campo)
   inputGroup: {
     marginBottom: SPACING.xl,
   },
   label: {
-    fontSize: FONT_SIZES.normal,
+    fontSize: FONT_SIZES.medium,
     fontWeight: "bold",
     color: COLORS.primaryDark,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
-  // Campo de texto
   input: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.lg,
-    fontSize: FONT_SIZES.normal,
     borderWidth: 1,
     borderColor: "#DDD",
-    color: COLORS.primaryDark,
+    borderRadius: 12,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 14,
+    fontSize: FONT_SIZES.medium,
+    backgroundColor: COLORS.white,
   },
-  // Opções de lembrar e esqueceu senha
   optionsContainer: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: SPACING.xxl,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xl,
   },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
+    flexShrink: 1,
+    paddingVertical: SPACING.sm,
   },
   checkboxLabel: {
-    fontSize: FONT_SIZES.normal,
-    color: COLORS.primary,
     marginLeft: SPACING.sm,
+    fontSize: FONT_SIZES.normal,
+    color: COLORS.primaryDark,
   },
   forgotPassword: {
     fontSize: FONT_SIZES.normal,
     color: COLORS.primary,
-    textDecorationLine: "underline",
+    paddingVertical: SPACING.sm,
   },
-  // Botão principal de login
   button: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 25,
-    paddingVertical: SPACING.lg,
-    alignItems: "center",
-    marginBottom: SPACING.xxl,
+    marginBottom: SPACING.xl,
   },
-  buttonText: {
-    color: COLORS.white,
-    fontSize: FONT_SIZES.large,
-    fontWeight: "bold",
-  },
-  // Divisor com texto "Ou"
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.xxl,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#DDD",
-  },
-  dividerText: {
-    marginHorizontal: SPACING.md,
-    color: COLORS.textGray,
-    fontSize: FONT_SIZES.normal,
-  },
-  // Botões de redes sociais
-  socialContainer: {
+  footer: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: SPACING.lg,
-    marginBottom: SPACING.xxl,
-  },
-  socialButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.white,
-    justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#DDD",
-  },
-  // Link de footer para criar conta
-  footerLink: {
-    alignItems: "center",
+    flexWrap: "wrap",
   },
   footerText: {
     fontSize: FONT_SIZES.normal,
     color: COLORS.textGray,
   },
-  footerTextBold: {
+  registerLink: {
+    fontSize: FONT_SIZES.normal,
+    color: COLORS.primary,
     fontWeight: "bold",
-    color: COLORS.primaryDark,
   },
 });

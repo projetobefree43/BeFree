@@ -1,28 +1,32 @@
-// 🎨 CORES DO APP - Toda a paleta de cores centralizada
+// esse arquivo é o "dicionário de cores e tamanhos" do app.
+// em vez de escrever a cor ou o tamanho toda hora, a gente guarda tudo aqui
+// com nomes fáceis e usa em qualquer tela. assim fica tudo igual e fácil de mudar.
+
+// as cores do app
 export const COLORS = {
-  // Cores primárias
-  primary: "#80A86A", // Verde principal
-  primaryDark: "#4A6B3E", // Verde escuro
-  primaryLight: "#E8F5E9", // Verde claro
+  // cores principais (tons de verde)
+  primary: "#80A86A", // verde principal (usado em botões)
+  primaryDark: "#4A6B3E", // verde escuro (textos e títulos)
+  primaryLight: "#E8F5E9", // verde claro (fundos suaves)
 
-  // Cores de fundo
-  background: "#F9F9F9", // Cinza claro
-  bgLight: "#FAFAFA", // Branco quase puro
-  white: "#FFFFFF", // Branco
+  // cores de fundo
+  background: "#F9F9F9", // cinza claro (fundo das telas)
+  bgLight: "#FAFAFA", // branco quase puro
+  white: "#FFFFFF", // branco
 
-  // Cores de texto
-  textDark: "#1C3113", // Preto/Texto escuro
-  textGray: "#888888", // Cinza médio
-  textGreen: "#6B8E59", // Verde médio
+  // cores de texto
+  textDark: "#1C3113", // preto/esverdeado escuro (textos)
+  textGray: "#888888", // cinza médio (textos secundários)
+  textGreen: "#6B8E59", // verde médio
 
-  // Cores especiais
-  danger: "#E57373", // Vermelho/Alerta
-  dangerLight: "#FFEBEE", // Vermelho claro
-  success: "#4CAF50", // Verde sucesso
-  warning: "#FFD700", // Ouro/Aviso
+  // cores especiais
+  danger: "#E57373", // vermelho (alertas, SOS)
+  dangerLight: "#FFEBEE", // vermelho claro
+  success: "#4CAF50", // verde de sucesso
+  warning: "#FFD700", // dourado (conquistas/troféus)
 };
 
-// 📐 ESPAÇAMENTO PADRÃO
+// espaçamentos padrão (distâncias entre elementos)
 export const SPACING = {
   xs: 4,
   sm: 8,
@@ -33,7 +37,7 @@ export const SPACING = {
   xxxl: 32,
 };
 
-// 📝 TAMANHOS DE FONTE
+// tamanhos de fonte (letras)
 export const FONT_SIZES = {
   small: 12,
   normal: 14,
@@ -44,31 +48,26 @@ export const FONT_SIZES = {
   xxxlarge: 32,
 };
 
-// 🏋️ PESOS DE FONTE
+// pesos de fonte (grossura da letra)
 export const FONT_WEIGHTS = {
   normal: "400",
   semibold: "600",
   bold: "bold",
 };
 
-// 🔘 ESTILOS COMUNS REUTILIZÁVEIS
+// estilos comuns que várias telas usam (pra não repetir)
 export const COMMON_STYLES = {
-  // Botão padrão
   button: {
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
   },
-
-  // Cartão padrão
   card: {
     backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
-
-  // Header padrão
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -76,13 +75,9 @@ export const COMMON_STYLES = {
     paddingVertical: SPACING.md,
     backgroundColor: COLORS.white,
   },
-
-  // Ícone de voltar
   backButton: {
     marginRight: SPACING.md,
   },
-
-  // Caixa de entrada
   inputBox: {
     borderRadius: 12,
     paddingHorizontal: SPACING.lg,

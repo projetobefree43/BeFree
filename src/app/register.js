@@ -1,261 +1,248 @@
+// essa é a tela de cadastro. aqui o usuário preenche nome, email e senha
+// pra criar uma conta nova. depois de criar, o app salva ele como "logado"
+// e manda direto pra tela principal.
+
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { AnimatedButton } from "../components/animated-button";
+import { AnimatedScreen } from "../components/animated-screen";
+import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import {
+    createUser,
+    getUserByEmail,
+    initDatabase,
+    setSetting,
+} from "../db";
 
 export default function RegisterScreen() {
   const router = useRouter();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = () => {
-    // Adicione sua lógica de cadastro aqui
-    console.log("Cadastrar:", { name, email, password });
+  // essa função roda quando o usuário clica em "Criar Conta"
+  const handleRegister = async () => {
+    const nameValue = name.trim();
+    const emailValue = email.trim().toLowerCase();
+
+    // verifica se todos os campos foram preenchidos
+    if (!nameValue || !emailValue || !password) {
+      Alert.alert(
+        "Campos obrigatórios",
+        "Preencha nome, email e senha para continuar."
+      );
+      return;
+    }
+
+    // verifica se o email tem um formato válido (tem @ e .)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue)) {
+      Alert.alert("Email inválido", "Digite um endereço de email válido.");
+      return;
+    }
+
+    // a senha precisa ter pelo menos 6 caracteres
+    if (password.length < 6) {
+      Alert.alert(
+        "Senha muito curta",
+        "A senha precisa ter pelo menos 6 caracteres."
+      );
+      return;
+    }
+
+    try {
+      await initDatabase();
+
+      // verifica se já existe alguém com esse email cadastrado
+      const existing = await getUserByEmail(emailValue);
+      if (existing) {
+        Alert.alert(
+          "Email já cadastrado",
+          "Já existe uma conta com este email. Tente entrar."
+        );
+        return;
+      }
+
+      // cria o usuário no banco e salva a sessão
+      const userId = await createUser({ name: nameValue, email: emailValue, password });
+      await setSetting("currentUserId", String(userId));
+      await setSetting("currentUserName", nameValue);
+
+      // manda direto pra tela principal
+      router.replace("/home");
+    } catch (error) {
+      console.error("Erro ao cadastrar:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível criar a conta. Tente novamente."
+      );
+    }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+    <AnimatedScreen>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.flex}
         >
-          {/* Botão de Voltar */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
           >
-            <Ionicons name="arrow-back" size={24} color="#1C2819" />
-          </TouchableOpacity>
+            {/* Botão de voltar */}
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={COLORS.primaryDark}
+              />
+            </TouchableOpacity>
 
-          {/* Cabeçalho */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Criar Conta</Text>
-            <Text style={styles.subtitle}>Sua liberdade começa aqui!</Text>
-          </View>
+            {/* Cabeçalho com título */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Criar Conta</Text>
+              <Text style={styles.subtitle}>Sua liberdade começa aqui!</Text>
+            </View>
 
-          {/* Formulário */}
-          <View style={styles.form}>
-            {/* Campo Nome */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome completo</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Digite seu nome"
-                placeholderTextColor="#A0A0A0"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
+            {/* Formulário com os 3 campos */}
+            <View style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Nome completo</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite seu nome"
+                  placeholderTextColor={COLORS.textGray}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite seu email"
+                  placeholderTextColor={COLORS.textGray}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Senha</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite sua senha"
+                  placeholderTextColor={COLORS.textGray}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
+
+              {/* Botão de cadastrar */}
+              <AnimatedButton
+                title="Criar Conta"
+                onPress={handleRegister}
+                style={styles.submitButton}
               />
             </View>
 
-            {/* Campo Email */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Digite seu email"
-                placeholderTextColor="#A0A0A0"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+            {/* Link pra ir pra tela de login */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Já tem uma conta? </Text>
+              <TouchableOpacity onPress={() => router.push("/login")}>
+                <Text style={styles.loginLink}>Entrar</Text>
+              </TouchableOpacity>
             </View>
-
-            {/* Campo Senha */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Senha</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Digite sua senha"
-                placeholderTextColor="#A0A0A0"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
-            </View>
-
-            {/* Botão Cadastrar */}
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleRegister}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.submitButtonText}>Criar Conta</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Divisor "Ou" */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Ou</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Botões de Redes Sociais */}
-          <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <Ionicons name="logo-google" size={26} color="#EA4335" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <Ionicons name="logo-facebook" size={26} color="#1877F2" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-              <Ionicons name="logo-apple" size={26} color="#000000" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Rodapé - Link para Login */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Já tem uma conta? </Text>
-            <TouchableOpacity onPress={() => router.push("/login")}>
-              <Text style={styles.loginLink}>Entrar</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </AnimatedScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#E2EBD8", // Cor de fundo verde clara da tela
-  },
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
-  scrollContent: {
-    paddingHorizontal: 32,
-    paddingTop: 24,
-    paddingBottom: 32,
+  flex: {
+    flex: 1,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    marginBottom: 24,
+  content: {
+    paddingHorizontal: SPACING.xxl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xxl,
   },
   header: {
-    alignItems: "center",
-    marginBottom: 40,
+    marginTop: SPACING.xxl,
+    marginBottom: SPACING.xxxl,
   },
   title: {
-    fontSize: 32,
+    fontSize: FONT_SIZES.xxlarge,
     fontWeight: "bold",
-    color: "#1C2819",
-    marginBottom: 12,
+    color: COLORS.primaryDark,
+    marginBottom: SPACING.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#2E3B2A",
-    fontWeight: "500",
-    marginBottom: 24,
+    fontSize: FONT_SIZES.medium,
+    color: COLORS.textGray,
   },
   form: {
-    width: "100%",
+    marginBottom: SPACING.xxl,
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: SPACING.xl,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2E3B2A",
-    marginBottom: 10,
+    fontSize: FONT_SIZES.medium,
+    fontWeight: "bold",
+    color: COLORS.primaryDark,
+    marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontSize: 15,
-    color: "#1C2819",
     borderWidth: 1,
-    borderColor: "#D0D9C8",
+    borderColor: "#DDD",
+    borderRadius: 12,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 14,
+    fontSize: FONT_SIZES.medium,
+    backgroundColor: COLORS.white,
   },
   submitButton: {
-    backgroundColor: "#7DA355", // Tom de verde do botão principal
-    borderRadius: 25,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 20,
-    marginBottom: 32,
-  },
-  submitButtonText: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#C2CEB8",
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: "#4A5A43",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  socialContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 20,
-    marginBottom: 32,
-  },
-  socialButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginTop: SPACING.xl,
   },
   footer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: SPACING.lg,
   },
   footerText: {
-    color: "#2E3B2A",
-    fontSize: 15,
-    fontWeight: "500",
+    fontSize: FONT_SIZES.normal,
+    color: COLORS.textGray,
   },
   loginLink: {
-    color: "#5B8039",
-    fontSize: 15,
+    fontSize: FONT_SIZES.normal,
+    color: COLORS.primary,
     fontWeight: "bold",
   },
 });

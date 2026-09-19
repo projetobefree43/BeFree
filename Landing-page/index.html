@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BeFree — Um smartwatch que identifica sinais de ansiedade e ajuda a interromper o impulso de apostar, em tempo real." />
+  <title>BeFree — Respire antes que o impulso vença</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============ NAVBAR ============ -->
+  <nav class="nav" id="nav">
+    <div class="container nav__inner">
+      <a href="#hero" class="nav__brand">
+        <svg class="nav__logo" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" fill="#E5F4EC" stroke="#1A9661" stroke-width="2.2"/>
+          <path d="M8 24c3-6 7-9 10-3 3 6 6 8 12 0" fill="none" stroke="#E57373" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+        <span>Be<span>Free</span></span>
+      </a>
+      <button class="nav__toggle" id="navToggle" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__menu" id="navMenu">
+        <li><a href="#problema">Problema</a></li>
+        <li><a href="#solucao">Solução</a></li>
+        <li><a href="#funcionalidades">Recursos</a></li>
+        <li><a href="#tecnologia">Tecnologia</a></li>
+        <li><a href="#pesquisa">Pesquisa</a></li>
+        <li><a href="#equipe">Equipe</a></li>
+        <li><a href="#contato" class="nav__cta">Fale conosco</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ============ 1. HERO ============ -->
+  <header class="hero" id="hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <span class="hero__badge reveal">Smartwatch de apoio emocional</span>
+        <h1 class="hero__title reveal">
+          Antes do impulso vencer,<br />
+          <span class="hero__title-accent">o BeFree te ajuda a respirar.</span>
+        </h1>
+        <p class="hero__sub reveal">
+          Um relógio que percebe os sinais do seu corpo, identifica momentos de
+          ansiedade e aparece no momento certo — para interromper o impulso de
+          apostar antes que ele aconteça.
+        </p>
+        <div class="hero__actions reveal">
+          <a href="#solucao" class="btn btn--primary">Saiba como funciona</a>
+          <a href="#pesquisa" class="btn btn--ghost">Ver a pesquisa</a>
+        </div>
+        <p class="hero__note reveal">Protótipo funcional · Escola Estadual Bento Quirino · 2026</p>
+      </div>
+
+      <!-- Ilustração do smartwatch em SVG com batimento animado -->
+      <div class="hero__visual reveal">
+        <div class="watch">
+          <div class="watch__pulse-ring watch__pulse-ring--1"></div>
+          <div class="watch__pulse-ring watch__pulse-ring--2"></div>
+          <div class="watch__crown"></div>
+          <svg class="watch__screen" viewBox="0 0 200 200" aria-hidden="true">
+            <rect x="18" y="18" width="164" height="164" rx="34" fill="#0E2E21"/>
+            <text x="100" y="64" text-anchor="middle" fill="#6EE7A3" font-size="30" font-weight="700" font-family="Poppins, sans-serif">78</text>
+            <text x="100" y="84" text-anchor="middle" fill="#7FA894" font-size="12" font-family="Inter, sans-serif">BPM</text>
+            <path class="watch__ecg" d="M30 128 L68 128 L82 106 L98 150 L114 120 L128 128 L170 128"
+                  fill="none" stroke="#E57373" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="100" y="172" text-anchor="middle" fill="#C9E8D8" font-size="14" font-weight="500" font-family="Inter, sans-serif">Respire fundo</text>
+            <rect x="10" y="2" width="120" height="16" rx="8" fill="#C9E8D8" opacity="0.25"/>
+          </svg>
+        </div>
+        <div class="watch__float-card watch__float-card--top">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>Ansiedade detectada</span>
+        </div>
+        <div class="watch__float-card watch__float-card--bottom">
+          <span class="dot dot--ok"></span>
+          <span>Modo Esporte ativo</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ 2. O PROBLEMA ============ -->
+  <section class="section" id="problema">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow eyebrow--danger">O problema</span>
+        <h2 class="section__title">No momento do impulso, <span class="accent-danger">ninguém está por perto</span></h2>
+        <p class="section__lead">
+          O vício em apostas costuma se manifestar em picos de ansiedade e inquietação,
+          acompanhados de um impulso repentino de apostar. Nesses segundos decisivos,
+          muitas pessoas estão sozinhas — sem ninguém para ajudar ali, naquele momento.
+        </p>
+      </div>
+      <div class="problem__grid">
+        <div class="card problem__card reveal">
+          <span class="card__icon card__icon--danger">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"/></svg>
+          </span>
+          <h3>Impulso repentino</h3>
+          <p>A vontade de apostar surge de forma súbita, muitas vezes ligada à ansiedade e ao estresse do momento.</p>
+        </div>
+        <div class="card problem__card reveal">
+          <span class="card__icon card__icon--danger">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 18v-6m6 6V9m6 9V5"/></svg>
+          </span>
+          <h3>Sós nos piores momentos</h3>
+          <p>O impulso costuma vir à noite ou em momentos de isolamento, quando não há ninguém para interromper a ação.</p>
+        </div>
+        <div class="card problem__card reveal">
+          <span class="card__icon card__icon--danger">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 8a5 5 0 0 0-10 0c0 6-3 7-3 7h16s-3-1-3-7M12 20a2 2 0 0 0 4 0"/></svg>
+          </span>
+          <h3>Sinais que passam despercebidos</h3>
+          <p>Coração acelerado, mãos suadas, agitação — o corpo avisa, mas naquele instante é difícil perceber.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. A SOLUÇÃO / COMO AJUDA ============ -->
+  <section class="section section--alt" id="solucao">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow">A solução</span>
+        <h2 class="section__title">Um parceiro no pulso, <span class="accent">no momento exato</span></h2>
+        <p class="section__lead">
+          O BeFree lê os sinais físicos do seu corpo e intervém com acolhimento quando
+          o risco de ceder ao impulso é maior. Veja como ele age em tempo real:
+        </p>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step__number">1</div>
+          <div class="step__content">
+            <span class="step__icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </span>
+            <h3>O sensor percebe</h3>
+            <p>O MPU6050 acompanha o movimento do braço enquanto a leitura cardíaca detecta a aceleração dos batimentos.</p>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step__number">2</div>
+          <div class="step__content">
+            <span class="step__icon step__icon--accent">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3l4 4-4 4-4-4 4-4zM5 13l7 7 7-7H5z"/></svg>
+            </span>
+            <h3>O sistema calcula o risco</h3>
+            <p>Combina frequência cardíaca e alterações de movimento em um "nível de risco" em tempo real.</p>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step__number">3</div>
+          <div class="step__content">
+            <span class="step__icon step__icon--green">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+            </span>
+            <h3>A mensagem de apoio aparece</h3>
+            <p>Se o risco supera o limite, entra o "modo de ajuda" e exibe mensagens como "Respire fundo" e "Isso vai passar".</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. FUNCIONALIDADES ============ -->
+  <section class="section" id="funcionalidades">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow">Recursos</span>
+        <h2 class="section__title">Tudo o que ele faz <span class="accent">por você</span></h2>
+        <p class="section__lead">Funcionalidades pensadas para acolher no presente e proteger para o futuro.</p>
+      </div>
+      <div class="features__grid">
+        <article class="card feature reveal">
+          <span class="card__icon card__icon--green">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          <h3>Detecção de risco</h3>
+          <p>Identifica padrões de ansiedade combinando batimentos cardíacos e movimentos do braço.</p>
+        </article>
+        <article class="card feature reveal">
+          <span class="card__icon card__icon--green">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/></svg>
+          </span>
+          <h3>Modo Esporte</h3>
+          <p>Evita que exercícios físicos sejam confundidos com ansiedade, desativando o alerta durante o treino.</p>
+        </article>
+        <article class="card feature reveal">
+          <span class="card__icon card__icon--green">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21s-7-5-9.5-9.5C.8 8.6 2.4 5 5.5 5.5 7.8 5.9 9 7.5 12 10c3-2.5 4.2-4.1 6.5-4.5C21.6 5 23.2 8.6 21.5 11.5 19 16 12 21 12 21z"/></svg>
+          </span>
+          <h3>Mensagens de apoio</h3>
+          <p>"Respire fundo", "Isso vai passar", "Você está seguro" — trocadas a cada 4 segundos no modo de ajuda.</p>
+        </article>
+        <article class="card feature reveal">
+          <span class="card__icon card__icon--danger">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21s-7-5-9.5-9.5C.8 8.6 2.4 5 5.5 5.5 7.8 5.9 9 7.5 12 10c3-2.5 4.2-4.1 6.5-4.5C21.6 5 23.2 8.6 21.5 11.5 19 16 12 21 12 21zM12 8v5M12 17h.01"/></svg>
+          </span>
+          <h3>Botão de Ajuda</h3>
+          <p>Enviará, no futuro, um alerta para contatos de confiança cadastrados por você. (Em desenvolvimento)</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. COMO FUNCIONA POR TRÁS (TECNOLOGIA) ============ -->
+  <section class="section section--alt" id="tecnologia">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow">Tecnologia</span>
+        <h2 class="section__title">Por dentro do <span class="accent">sistema</span></h2>
+        <p class="section__lead">Componentes simples e confiáveis, trabalhando juntos para cuidar de você.</p>
+      </div>
+
+      <div class="tech__grid">
+        <div class="tech reveal">
+          <div class="tech__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="6" y="9" width="6" height="6" fill="currentColor"/><circle cx="17" cy="12" r="1.6" fill="currentColor"/></svg>
+          </div>
+          <h3>ESP32</h3>
+          <p>Unidade central de processamento — o "cérebro" que lê todos os sinais do dispositivo.</p>
+        </div>
+        <div class="tech reveal">
+          <div class="tech__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2" d="M12 5V2M12 22v-3M5 12H2m20 0h-3M7 7L5 5m14 14l-2-2M17 7l2-2M7 17l-2 2"/></svg>
+          </div>
+          <h3>Sensor MPU6050</h3>
+          <p>Acompanha os movimentos do braço para detectar agitação e inquietação.</p>
+        </div>
+        <div class="tech reveal">
+          <div class="tech__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" d="M7 12h3l2-3 2 5 2-3 1 1"/></svg>
+          </div>
+          <h3>Display OLED SSD1306</h3>
+          <p>Mostra os BPM, o nível de risco e as mensagens de apoio na hora certa.</p>
+        </div>
+        <div class="tech reveal">
+          <div class="tech__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h3>Leitura cardíaca</h3>
+          <p>Sensor de batimentos para acompanhar a frequência cardíaca. Em desenvolvimento para a versão física.</p>
+        </div>
+        <div class="tech reveal">
+          <div class="tech__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 18V5l12-2v13M9 9l12-2M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 14a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+          </div>
+          <h3>3 botões físicos</h3>
+          <p>Modo Esporte, Pedido de Ajuda e Consulta de Informações — controle total no pulso.</p>
+        </div>
+        <div class="tech reveal">
+          <div class="tech__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          </div>
+          <h3>Cálculo de risco</h3>
+          <p>Um algoritmo combina batimentos e movimento em um nível de risco com limite de alerta.</p>
+        </div>
+      </div>
+
+      <div class="diagram reveal">
+        <p class="diagram__label">Humor em tempo real, direto do pulso</p>
+        <div class="diagram__bars">
+          <span class="diagram__bar diagram__bar--1"></span>
+          <span class="diagram__bar diagram__bar--2"></span>
+          <span class="diagram__bar diagram__bar--3"></span>
+          <span class="diagram__bar diagram__bar--4"></span>
+          <span class="diagram__bar diagram__bar--5"></span>
+          <span class="diagram__bar diagram__bar--6"></span>
+        </div>
+        <p class="diagram__hint">Frequência cardíaca (BPM) · limite de alerta destacado</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. A PESQUISA ============ -->
+  <section class="section" id="pesquisa">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow eyebrow--danger">A pesquisa por trás</span>
+        <h2 class="section__title">Baseado em <span class="accent-danger">evidências reais</span></h2>
+        <p class="section__lead">
+          Para garantir que o BeFree respondesse a necessidades verdadeiras, entrevistamos
+          3 participantes de um grupo de apoio a pessoas com vício em apostas. Os resultados:
+        </p>
+      </div>
+
+      <div class="stats__grid">
+        <div class="stat reveal">
+          <strong>100%</strong>
+          <p>relataram aceleração dos batimentos cardíacos antes de apostar</p>
+        </div>
+        <div class="stat reveal">
+          <strong>100%</strong>
+          <p>notaram alterações na respiração (curta, rápida ou presa)</p>
+        </div>
+        <div class="stat reveal">
+          <strong>100%</strong>
+          <p>sentiram mãos frias, suadas ou trêmulas e agitação repetitiva</p>
+        </div>
+        <div class="stat reveal">
+          <strong>100%</strong>
+          <p>disseram que ver alguém importante ajudaria muito a interromper o impulso</p>
+        </div>
+        <div class="stat reveal">
+          <strong>100%</strong>
+          <p>concordaram que uma interrupção externa reduz o impulso de apostar</p>
+        </div>
+        <div class="stat stat--danger reveal">
+          <strong>2 de 3</strong>
+          <p>preferiram vibração + alerta sonoro para voltar a atenção ao presente</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. SOBRE / EQUIPE ============ -->
+  <section class="section section--alt" id="equipe">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="eyebrow">Sobre o projeto</span>
+        <h2 class="section__title">Feito com <span class="accent">cuidado e propósito</span></h2>
+        <p class="section__lead">Um projeto escolar que nasceu para fazer a diferença na vida real.</p>
+      </div>
+
+      <div class="team__intro reveal">
+        <p>
+          O BeFree é um sistema em formato de smartwatch que analisa sinais relacionados à
+          movimentação e à frequência cardíaca, apresentando mensagens de apoio em possíveis
+          momentos de ansiedade ou agitação — auxiliando no controle do impulso de apostar.
+        </p>
+      </div>
+
+      <div class="team__cards">
+        <div class="card member reveal">
+          <div class="member__avatar">
+            <img
+              class="team-photo-francisco"
+              src="assets/images/francisco.jpg"
+              alt="Foto de perfil de Francisco Ferreira de Almeida"
+            />
+          </div>
+          <h3>Francisco Ferreira de Almeida</h3>
+          <p>Desenvolvimento &amp; Autores</p>
+        </div>
+        <div class="card member reveal">
+          <div class="member__avatar">
+            <img
+              class="team-photo-vitor"
+              src="assets/images/vitor.jpg"
+              alt="Foto de perfil de Vitor Zappala Lovatto"
+            />
+          </div>
+          <h3>Vitor Zappala Lovatto</h3>
+          <p>Desenvolvimento &amp; Autores</p>
+        </div>
+        <div class="card member reveal">
+          <div class="member__avatar">
+            <img
+              src="assets/images/gabriel.jpg"
+              alt="Foto de perfil de Gabriel Henrique Pierri Martins"
+            />
+          </div>
+          <h3>Gabriel Henrique Pierri Martins</h3>
+          <p>Desenvolvimento &amp; Autores</p>
+        </div>
+      </div>
+
+      <div class="school reveal">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 10L12 5 2 10l10 5 10-5zM6 12v5c0 1.1 2.7 2.5 6 2.5s6-1.4 6-2.5v-5"/></svg>
+        <p><strong>Escola Estadual Bento Quirino</strong> — Turma 2DS · Campinas, 2026</p>
+        <p class="school__status">Status atual: protótipo funcional simulado na plataforma Wokwi</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. CTA FINAL ============ -->
+  <section class="section section--cta" id="contato">
+    <div class="container container--narrow">
+      <div class="cta__card reveal">
+        <h2 class="cta__title">Quer saber mais sobre o BeFree?</h2>
+        <p class="cta__text">
+          Deixe seu contato para conversarmos sobre o projeto, parcerias e o futuro
+          dessa tecnologia. Estamos só começando.
+        </p>
+        <form class="cta__form" id="contactForm" novalidate>
+          <div class="cta__field">
+            <label for="name">Nome</label>
+            <input type="text" id="name" name="name" placeholder="Seu nome" required />
+          </div>
+          <div class="cta__field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="seu@email.com" required />
+          </div>
+          <div class="cta__field cta__field--full">
+            <label for="message">Mensagem</label>
+            <textarea id="message" name="message" rows="3" placeholder="Como podemos ajudar?"></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary cta__submit">Enviar mensagem</button>
+        </form>
+        <p class="cta__feedback" id="ctaFeedback" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 9. FOOTER ============ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#hero" class="nav__brand">
+          <svg class="nav__logo" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#1A3A2C" stroke="#4ADE80" stroke-width="2.2"/>
+            <path d="M8 24c3-6 7-9 10-3 3 6 6 8 12 0" fill="none" stroke="#F87171" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+          <span>Be<span>Free</span></span>
+        </a>
+        <p>Respire. Sinta. Continue.</p>
+      </div>
+      <div class="footer__info">
+        <p><strong>BeFree</strong> · 2026</p>
+        <p>Escola Estadual Bento Quirino · Turma 2DS · Campinas</p>
+      </div>
+      <p class="footer__mission">
+        Acreditamos que ninguém deveria enfrentar o impulso sozinho — naquele segundo,
+        no calor da ansiedade, alguém estará sempre ao seu lado.
+      </p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

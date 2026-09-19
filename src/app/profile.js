@@ -1,6 +1,11 @@
+// essa é a tela de Perfil. aqui o usuário vê seus dados (nome, email, foto)
+// e pode acessar as configurações: editar conta, privacidade, ajuda e sair.
+
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+    Image,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -8,130 +13,162 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { AnimatedButton } from "../components/animated-button";
+import { AnimatedScreen } from "../components/animated-screen";
+import { InfoBox } from "../components/info-box";
+import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import {
+    getSetting,
+    getUserById,
+    initDatabase,
+    removeSetting,
+} from "../db";
 
-// Tela de Perfil - Informações do usuário e configurações
 export default function Profile() {
   const router = useRouter();
+  const [name, setName] = useState("Sophia Darini");
+  const [email, setEmail] = useState("sophia.darini@email.com");
+  const [photo, setPhoto] = useState(null);
+
+  // carrega os dados do usuário logado do banco
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        await initDatabase();
+        const sessionUserId = await getSetting("currentUserId");
+        if (sessionUserId) {
+          const user = await getUserById(Number(sessionUserId));
+          if (user) {
+            setName(user.name);
+            setEmail(user.email);
+            setPhoto(user.photo ?? null);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar usuário:", error);
+      }
+    };
+    loadUser();
+  }, []);
+
+  // função de logout: limpa a sessão e manda pra tela de login
+  const handleLogout = async () => {
+    try {
+      await initDatabase();
+      await removeSetting("currentUserId");
+      await removeSetting("currentUserName");
+      router.replace("/login");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header com botão de voltar e título */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={COLORS.primaryDark}
-            style={styles.backButton}
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>Perfil</Text>
-      </View>
+    <AnimatedScreen>
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title="Perfil" onBackPress={() => router.back()} />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Cartão de perfil do usuário */}
-        <View style={styles.profileCard}>
-          {/* Avatar circular */}
-          <View style={styles.avatar}>
-            <MaterialCommunityIcons
-              name="account"
-              size={60}
-              color={COLORS.white}
+        <ScrollView contentContainerStyle={styles.content}>
+          {/* Card com foto, nome e email */}
+          <View style={styles.profileCard}>
+            <View style={styles.avatar}>
+              {photo ? (
+                <Image source={{ uri: photo }} style={styles.avatarImage} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="account"
+                  size={60}
+                  color={COLORS.white}
+                />
+              )}
+            </View>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.email}>{email}</Text>
+          </View>
+
+          {/* Seção de informações básicas */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Informações</Text>
+            <InfoBox label="Membro desde:" value="Janeiro 2024" />
+            <InfoBox label="Sequência atual:" value="7 dias" />
+          </View>
+
+          {/* Seção de configurações (abre outras telas) */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Configurações</Text>
+            <MenuItemButton
+              icon="settings"
+              label="Configurações da Conta"
+              onPress={() => router.push("/account")}
+            />
+            <MenuItemButton
+              icon="lock"
+              label="Privacidade e Segurança"
+              onPress={() => router.push("/privacy")}
+            />
+            <MenuItemButton
+              icon="help-circle"
+              label="Ajuda e Suporte"
+              onPress={() => router.push("/help")}
             />
           </View>
-          <Text style={styles.name}>Ana Silva</Text>
-          <Text style={styles.email}>ana.silva@email.com</Text>
-        </View>
 
-        {/* Seção de informações do usuário */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações</Text>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Membro desde:</Text>
-            <Text style={styles.infoValue}>Janeiro 2024</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Sequência atual:</Text>
-            <Text style={styles.infoValue}>7 dias</Text>
-          </View>
-        </View>
+          {/* Botão de logout */}
+          <AnimatedButton
+            title="Sair da Conta"
+            onPress={handleLogout}
+            style={styles.logoutButton}
+            textStyle={styles.logoutText}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    </AnimatedScreen>
+  );
+}
 
-        {/* Seção de configurações */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Configurações</Text>
-          {/* Menu Item: Configurações da Conta */}
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="settings" size={20} color={COLORS.primary} />
-            <Text style={styles.menuText}>Configurações da Conta</Text>
-            <Ionicons name="chevron-forward" size={20} color="#DDD" />
-          </TouchableOpacity>
-          {/* Menu Item: Privacidade e Segurança */}
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="lock" size={20} color={COLORS.primary} />
-            <Text style={styles.menuText}>Privacidade e Segurança</Text>
-            <Ionicons name="chevron-forward" size={20} color="#DDD" />
-          </TouchableOpacity>
-          {/* Menu Item: Ajuda e Suporte */}
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="help-circle" size={20} color={COLORS.primary} />
-            <Text style={styles.menuText}>Ajuda e Suporte</Text>
-            <Ionicons name="chevron-forward" size={20} color="#DDD" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Botão de logout */}
-        <TouchableOpacity style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Sair da Conta</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+// componente de menu: um botão com ícone, texto e setinha pra direita
+function MenuItemButton({ icon, label, onPress }) {
+  return (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+      <Ionicons name={icon} size={20} color={COLORS.primary} />
+      <Text style={styles.menuText}>{label}</Text>
+      <Ionicons name="chevron-forward" size={20} color="#DDD" />
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  // Fundo e layout principal
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  // Header com título
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.white,
-  },
-  backButton: {
-    marginRight: SPACING.md,
-  },
-  title: {
-    fontSize: FONT_SIZES.xlarge,
-    fontWeight: "bold",
-    color: COLORS.primaryDark,
-  },
   content: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xxl + SPACING.xl,
+    paddingBottom: SPACING.xxxl,
   },
-  // Cartão de perfil do usuário
   profileCard: {
     alignItems: "center",
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    paddingVertical: SPACING.xxl,
+    borderRadius: 16,
+    paddingVertical: SPACING.xxxl,
     marginBottom: SPACING.xxl,
   },
-  // Avatar circular
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 104,
+    height: 104,
+    borderRadius: 52,
     backgroundColor: COLORS.primary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: SPACING.lg,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   name: {
     fontSize: FONT_SIZES.large,
@@ -143,7 +180,6 @@ const styles = StyleSheet.create({
     color: COLORS.textGray,
     marginTop: SPACING.md,
   },
-  // Seção com título
   section: {
     marginBottom: SPACING.xxl,
   },
@@ -153,33 +189,14 @@ const styles = StyleSheet.create({
     color: COLORS.primaryDark,
     marginBottom: SPACING.md,
   },
-  // Item de informação
-  infoItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  infoLabel: {
-    fontSize: FONT_SIZES.normal,
-    color: COLORS.textGray,
-  },
-  infoValue: {
-    fontSize: FONT_SIZES.normal,
-    fontWeight: "bold",
-    color: COLORS.primaryDark,
-  },
-  // Item de menu com ícone
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.white,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.lg,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   menuText: {
     flex: 1,
@@ -187,13 +204,12 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.normal,
     color: COLORS.primaryDark,
   },
-  // Botão de logout
   logoutButton: {
     backgroundColor: COLORS.danger,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingVertical: SPACING.lg,
     alignItems: "center",
-    marginTop: SPACING.xxl,
+    marginTop: SPACING.xl,
   },
   logoutText: {
     color: COLORS.white,

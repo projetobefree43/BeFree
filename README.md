@@ -59,9 +59,8 @@ npx expo start
 Projeto desenvolvido em grupo por:
 
 - Gabriel Henrique Pierri Martins
-- Francisco
-- Gabriel
-- Vitor
+- Francisco Ferrreira de Almeida
+- Vitor Zappalla Lovato
 
 ## 📄 Licença
 

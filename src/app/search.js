@@ -17,69 +17,88 @@ import {
 import { AnimatedScreen } from "../components/animated-screen";
 import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { useLanguage } from "../i18n";
 
 // lista de todas as funcionalidades que o usuário pode buscar
 // cada uma tem título, subtítulo, ícone, rota (pra onde vai) e palavras-chave
 const OPTIONS = [
   {
     title: "Início",
+    titleKey: "searchHomeTitle",
     subtitle: "Hub central do app",
+    subtitleKey: "searchHomeSubtitle",
     icon: "home",
     route: "/home",
     keywords: "inicio home principal dashboard menu inicial",
   },
   {
     title: "Botão SOS / Pânico",
+    titleKey: "searchSosTitle",
     subtitle: "Intervenção imediata",
+    subtitleKey: "searchSosSubtitle",
     icon: "alert-circle-outline",
     route: "/sos",
     keywords: "sos panico emergencia alerta urgencia ajuda desespero",
   },
   {
     title: "Rede de Apoio",
+    titleKey: "searchSupportTitle",
     subtitle: "Gestão de contatos",
+    subtitleKey: "searchSupportSubtitle",
     icon: "account-group-outline",
     route: "/support",
     keywords: "apoio contatos rede contato telefone suporte pessoas terapeuta",
   },
   {
     title: "Painel do Relógio",
+    titleKey: "searchWatchTitle",
     subtitle: "BeFree Sync ativo",
+    subtitleKey: "searchWatchSubtitle",
     icon: "watch-variant",
     route: "/watch",
     keywords: "relogio watch sync wearable notificacoes vibracao",
   },
   {
     title: "Diário de Gatilhos",
+    titleKey: "searchJournalTitle",
     subtitle: "Mapeamento Emocional",
+    subtitleKey: "searchJournalSubtitle",
     icon: "heart-pulse",
     route: "/journal",
     keywords: "diario gatilhos emocao registro anotacoes sentimentos",
   },
   {
     title: "Conquistas",
+    titleKey: "searchAchievementsTitle",
     subtitle: "Gamificação & Metas",
+    subtitleKey: "searchAchievementsSubtitle",
     icon: "trophy-outline",
     route: "/achievements",
     keywords: "conquistas trofeus gamificacao recompensas vitorias",
   },
   {
     title: "Perfil",
+    titleKey: "searchProfileTitle",
     subtitle: "Sua conta e configurações",
+    subtitleKey: "searchProfileSubtitle",
     icon: "person-outline",
     route: "/profile",
     keywords: "perfil conta usuario configuracoes sair logout dados",
   },
   {
     title: "Privacidade e Segurança",
+    titleKey: "searchPrivacyTitle",
     subtitle: "Proteção de dados e acesso",
+    subtitleKey: "searchPrivacySubtitle",
     icon: "lock-closed-outline",
     route: "/privacy",
     keywords: "privacidade seguranca senha dados ocultar esconder apagar limpar",
   },
   {
     title: "Ajuda e Suporte",
+    titleKey: "searchHelpTitle",
     subtitle: "Contato e perguntas frequentes",
+    subtitleKey: "searchHelpSubtitle",
     icon: "help-circle-outline",
     route: "/help",
     keywords: "ajuda suporte faq contato duvidas telefone email cvv samu central",
@@ -117,6 +136,7 @@ const buildResults = (query) => {
 
 export default function Search() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
 
   const results = buildResults(query);
@@ -125,7 +145,7 @@ export default function Search() {
   return (
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Buscar" onBackPress={() => router.back()} />
+        <ScreenHeader title={t("searchTitle")} onBackPress={() => router.back()} />
 
         <View style={styles.content}>
           {/* barra de busca com ícone de lupa e botão de limpar */}
@@ -133,7 +153,7 @@ export default function Search() {
             <Ionicons name="search" size={20} color={COLORS.textGray} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Buscar na aplicação..."
+              placeholder={t("searchPlaceholder")}
               placeholderTextColor={COLORS.textGray}
               value={query}
               onChangeText={setQuery}
@@ -152,7 +172,7 @@ export default function Search() {
             <View style={styles.emptyState}>
               <Ionicons name="search" size={80} color="#DDD" />
               <Text style={styles.emptyText}>
-                Digite para buscar opções no app
+                {t("searchEmptyPrompt")}
               </Text>
             </View>
           ) : /* se digitou mas não achou nada */
@@ -160,7 +180,7 @@ export default function Search() {
             <View style={styles.emptyState}>
               <Ionicons name="search" size={80} color="#DDD" />
               <Text style={styles.emptyText}>
-                {`Nenhum resultado para "${query.trim()}"`}
+                {t("noResults", { query: query.trim() })}
               </Text>
             </View>
           ) : (
@@ -170,7 +190,7 @@ export default function Search() {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-              <Text style={styles.resultsLabel}>Opções encontradas</Text>
+              <Text style={styles.resultsLabel}>{t("resultsLabel")}</Text>
               {results.map((option) => (
                 <TouchableOpacity
                   key={option.route}
@@ -182,8 +202,8 @@ export default function Search() {
                     <Ionicons name={option.icon} size={20} color={COLORS.primary} />
                   </View>
                   <View style={styles.resultInfo}>
-                    <Text style={styles.resultTitle}>{option.title}</Text>
-                    <Text style={styles.resultSubtitle}>{option.subtitle}</Text>
+                    <Text style={styles.resultTitle}>{t(option.titleKey)}</Text>
+                    <Text style={styles.resultSubtitle}>{t(option.subtitleKey)}</Text>
                   </View>
                   <Ionicons
                     name="chevron-forward"

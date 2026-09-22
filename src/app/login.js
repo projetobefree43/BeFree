@@ -21,9 +21,11 @@ import { AnimatedButton } from "../components/animated-button";
 import { AnimatedScreen } from "../components/animated-screen";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 import { getUserByEmail, initDatabase, setSetting } from "../db";
+import { useLanguage } from "../i18n";
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   // "useState" é como o React guarda dados que podem mudar na tela.
   // aqui a gente guarda o email, a senha, e se o usuário quer ser lembrado
@@ -38,8 +40,8 @@ export default function Login() {
     // verifica se os campos foram preenchidos
     if (!emailValue || !password) {
       Alert.alert(
-        "Campos obrigatórios",
-        "Preencha o email e a senha para entrar."
+        t("requiredFields"),
+        t("requiredFieldsLoginMessage")
       );
       return;
     }
@@ -51,15 +53,15 @@ export default function Login() {
       const user = await getUserByEmail(emailValue);
       if (!user) {
         Alert.alert(
-          "Conta não encontrada",
-          "Este email não está cadastrado. Crie uma conta primeiro."
+          t("accountNotFound"),
+          t("accountNotFoundMessage")
         );
         return;
       }
 
       // verifica se a senha bate com a que tá no banco
       if (user.password !== password) {
-        Alert.alert("Senha incorreta", "Verifique a senha e tente novamente.");
+        Alert.alert(t("wrongPassword"), t("wrongPasswordMessage"));
         return;
       }
 
@@ -70,7 +72,7 @@ export default function Login() {
       router.replace("/home");
     } catch (error) {
       console.error("Erro ao entrar:", error);
-      Alert.alert("Erro", "Não foi possível entrar. Tente novamente.");
+      Alert.alert(t("error"), t("loginErrorMessage"));
     }
   };
 
@@ -96,15 +98,15 @@ export default function Login() {
             showsVerticalScrollIndicator={false}
           >
             {/* Títulos */}
-            <Text style={styles.title}>Entrar</Text>
-            <Text style={styles.subtitle}>Bom te ter de volta!</Text>
+            <Text style={styles.title}>{t("loginTitle")}</Text>
+            <Text style={styles.subtitle}>{t("loginSubtitle")}</Text>
 
             {/* Campo de Email */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>{t("emailLabel")}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Digite seu email"
+                placeholder={t("emailPlaceholder")}
                 placeholderTextColor={COLORS.textGray}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -115,10 +117,10 @@ export default function Login() {
 
             {/* Campo de Senha */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Senha</Text>
+              <Text style={styles.label}>{t("passwordLabel")}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Digite sua senha"
+                placeholder={t("passwordPlaceholder")}
                 placeholderTextColor={COLORS.textGray}
                 secureTextEntry
                 value={password}
@@ -137,25 +139,25 @@ export default function Login() {
                   size={20}
                   color={COLORS.primary}
                 />
-                <Text style={styles.checkboxLabel}>Lembrar de mim</Text>
+                <Text style={styles.checkboxLabel}>{t("rememberMe")}</Text>
               </TouchableOpacity>
               <TouchableOpacity>
-                <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
+                <Text style={styles.forgotPassword}>{t("forgotPassword")}</Text>
               </TouchableOpacity>
             </View>
 
             {/* Botão de Login (usa o AnimatedButton que tem animação de escala) */}
             <AnimatedButton
-              title="Entrar"
+              title={t("loginButton")}
               onPress={handleLogin}
               style={styles.button}
             />
 
             {/* Link pra ir pra tela de cadastro */}
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Não tem conta? </Text>
+              <Text style={styles.footerText}>{t("noAccount")}</Text>
               <TouchableOpacity onPress={() => router.push("/register")}>
-                <Text style={styles.registerLink}>Cadastre-se</Text>
+                <Text style={styles.registerLink}>{t("signUpLink")}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

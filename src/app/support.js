@@ -27,9 +27,11 @@ import {
     insertContact,
     updateContact,
 } from "../db";
+import { useLanguage } from "../i18n";
 
 export default function Support() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [contacts, setContacts] = useState([]);
   const [userId, setUserId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -79,8 +81,8 @@ export default function Support() {
     // os dois campos são obrigatórios
     if (!name || !phone) {
       Alert.alert(
-        "Campos obrigatórios",
-        "Preencha o nome e o telefone do contato para continuar."
+        t("requiredFields"),
+        t("requiredFieldsContactMessage")
       );
       return;
     }
@@ -118,12 +120,12 @@ export default function Support() {
   // pergunta se tem certeza antes de apagar um contato
   const handleDeleteContact = (contact) => {
     Alert.alert(
-      "Excluir contato",
-      `Tem certeza que deseja excluir ${contact.name} da sua rede de apoio?`,
+      t("deleteContactTitle"),
+      t("deleteContactMessage", { name: contact.name }),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Excluir",
+          text: t("delete"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -145,9 +147,9 @@ export default function Support() {
   return (
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Rede de Apoio" onBackPress={() => router.back()} />
+        <ScreenHeader title={t("supportTitle")} onBackPress={() => router.back()} />
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.subtitle}>Gestão de contatos</Text>
+          <Text style={styles.subtitle}>{t("supportSubtitle")}</Text>
 
           {/* lista de contatos cadastrados */}
           {contacts.map((contact) => (
@@ -192,7 +194,7 @@ export default function Support() {
             onPress={openNewContact}
           >
             <Ionicons name="add" size={24} color={COLORS.white} />
-            <Text style={styles.addButtonText}>Adicionar Contato</Text>
+            <Text style={styles.addButtonText}>{t("addContactButton")}</Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -209,19 +211,19 @@ export default function Support() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
               <Text style={styles.modalTitle}>
-                {editingContact ? "Editar Contato" : "Novo Contato"}
+                {editingContact ? t("modalEditContactTitle") : t("modalNewContactTitle")}
               </Text>
 
-              <Text style={styles.modalLabel}>Nome</Text>
+              <Text style={styles.modalLabel}>{t("contactNameLabel")}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Nome do contato"
+                placeholder={t("contactNamePlaceholder")}
                 placeholderTextColor={COLORS.textGray}
                 value={newName}
                 onChangeText={setNewName}
               />
 
-              <Text style={styles.modalLabel}>Telefone</Text>
+              <Text style={styles.modalLabel}>{t("contactPhoneLabel")}</Text>
               <TextInput
                 style={styles.modalInput}
                 placeholder="(00) 00000-0000"
@@ -239,14 +241,14 @@ export default function Support() {
                     setModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                  <Text style={styles.modalCancelText}>{t("cancel")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalConfirmButton}
                   onPress={handleSaveContact}
                 >
                   <Text style={styles.modalConfirmText}>
-                    {editingContact ? "Salvar" : "Adicionar"}
+                    {editingContact ? t("save") : t("add")}
                   </Text>
                 </TouchableOpacity>
               </View>

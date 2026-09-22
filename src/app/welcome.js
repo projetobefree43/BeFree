@@ -14,9 +14,11 @@ import {
     View,
 } from "react-native";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { useLanguage } from "../i18n";
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   return (
     // ImageBackground mostra uma imagem de fundo que cobre a tela toda
@@ -42,7 +44,7 @@ export default function WelcomeScreen() {
 
           {/* Texto principal de apresentação */}
           <View style={styles.textContainer}>
-            <Text style={styles.title}>Você merece{"\n"}uma vida livre.</Text>
+            <Text style={styles.title}>{t("welcomeTitle")}</Text>
           </View>
 
           {/* Botões de ação: criar conta ou entrar */}
@@ -53,10 +55,10 @@ export default function WelcomeScreen() {
               onPress={() => router.push("/register")}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryButtonText}>Começar agora</Text>
+              <Text style={styles.primaryButtonText}>{t("getStartedButton")}</Text>
             </TouchableOpacity>
 
-            <Text style={styles.loginQuestion}>Já tem uma conta?</Text>
+            <Text style={styles.loginQuestion}>{t("loginQuestion")}</Text>
 
             {/* botão com borda que manda pra tela de login */}
             <TouchableOpacity
@@ -64,7 +66,7 @@ export default function WelcomeScreen() {
               onPress={() => router.push("/login")}
               activeOpacity={0.8}
             >
-              <Text style={styles.secondaryButtonText}>Entrar</Text>
+              <Text style={styles.secondaryButtonText}>{t("loginButton")}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

@@ -33,9 +33,11 @@ import {
     setPrivacySettings,
     updateUserPassword,
 } from "../db";
+import { useLanguage } from "../i18n";
 
 export default function Privacy() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [userId, setUserId] = useState(null);
   const [hideName, setHideName] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -76,15 +78,15 @@ export default function Privacy() {
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
       Alert.alert(
-        "Campos obrigatórios",
-        "Informe a senha atual e a nova senha."
+        t("requiredFields"),
+        t("passwordRequiredMessage")
       );
       return;
     }
     if (newPassword.length < 6) {
       Alert.alert(
-        "Senha muito curta",
-        "A nova senha precisa ter pelo menos 6 caracteres."
+        t("passwordTooShort"),
+        t("passwordTooShortMessage")
       );
       return;
     }
@@ -92,20 +94,20 @@ export default function Privacy() {
       await initDatabase();
       const user = await getUserById(userId);
       if (!user) {
-        Alert.alert("Erro", "Usuário não encontrado.");
+        Alert.alert(t("error"), t("userNotFound"));
         return;
       }
       if (currentPassword !== user.password) {
-        Alert.alert("Senha atual incorreta", "Verifique a senha atual.");
+        Alert.alert(t("wrongCurrentPassword"), t("wrongCurrentPasswordMessage"));
         return;
       }
       await updateUserPassword(userId, newPassword);
       setCurrentPassword("");
       setNewPassword("");
-      Alert.alert("Sucesso", "Sua senha foi alterada.");
+      Alert.alert(t("success"), t("passwordChanged"));
     } catch (error) {
       console.error("Erro ao alterar senha:", error);
-      Alert.alert("Erro", "Não foi possível alterar a senha.");
+      Alert.alert(t("error"), t("passwordChangeError"));
     }
   };
 
@@ -113,12 +115,12 @@ export default function Privacy() {
   // essa ação é irreversível
   const handleDeleteAllData = () => {
     Alert.alert(
-      "Apagar todos os dados",
-      "Todos os dados locais deste aparelho (contas, diário, contatos e configurações) serão apagados para sempre. Esta ação não pode ser desfeita.",
+      t("deleteAllDataTitle"),
+      t("deleteAllDataMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Apagar tudo",
+          text: t("deleteEverything"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -127,7 +129,7 @@ export default function Privacy() {
               router.replace("/welcome");
             } catch (error) {
               console.error("Erro ao apagar dados:", error);
-              Alert.alert("Erro", "Não foi possível apagar os dados.");
+              Alert.alert(t("error"), t("deleteAllError"));
             }
           },
         },
@@ -151,7 +153,7 @@ export default function Privacy() {
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
         <ScreenHeader
-          title="Privacidade e Segurança"
+          title={t("privacyTitle")}
           onBackPress={() => router.back()}
         />
 
@@ -164,16 +166,16 @@ export default function Privacy() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="eye-off-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Acesso e visibilidade</Text>
+              <Text style={styles.sectionTitle}>{t("accessVisibilitySection")}</Text>
             </View>
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>
-                  Ocultar meu nome na tela inicial
+                  {t("hideNameSetting")}
                 </Text>
                 <Text style={styles.settingHint}>
-                  Não exibe seu nome na saudação do app
+                  {t("hideNameHint")}
                 </Text>
               </View>
               <Switch
@@ -188,23 +190,23 @@ export default function Privacy() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="lock-closed-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Alterar senha</Text>
+              <Text style={styles.sectionTitle}>{t("changePasswordSection")}</Text>
             </View>
 
-            <Text style={styles.label}>Senha atual</Text>
+            <Text style={styles.label}>{t("currentPasswordLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Digite sua senha atual"
+              placeholder={t("currentPasswordPlaceholder")}
               placeholderTextColor={COLORS.textGray}
               secureTextEntry
               value={currentPassword}
               onChangeText={setCurrentPassword}
             />
 
-            <Text style={styles.label}>Nova senha</Text>
+            <Text style={styles.label}>{t("newPasswordLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Mínimo de 6 caracteres"
+              placeholder={t("newPasswordPlaceholder")}
               placeholderTextColor={COLORS.textGray}
               secureTextEntry
               value={newPassword}
@@ -212,7 +214,7 @@ export default function Privacy() {
             />
 
             <AnimatedButton
-              title="Alterar senha"
+              title={t("changePasswordButton")}
               onPress={handleChangePassword}
               style={styles.saveButton}
             />
@@ -222,14 +224,13 @@ export default function Privacy() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="shield-checkmark-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Seus dados</Text>
+              <Text style={styles.sectionTitle}>{t("yourDataSection")}</Text>
             </View>
 
             <View style={styles.infoBox}>
               <Ionicons name="hardware-chip-outline" size={20} color={COLORS.primary} />
               <Text style={styles.infoText}>
-                Todos os seus dados ficam armazenados somente neste aparelho,
-                em banco local. Nenhuma informação é enviada para servidores.
+                {t("dataInfoText")}
               </Text>
             </View>
 
@@ -239,7 +240,7 @@ export default function Privacy() {
             >
               <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
               <Text style={[styles.actionButtonText, styles.dangerText]}>
-                Apagar todos os dados do app
+                {t("deleteAllDataButton")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -248,12 +249,12 @@ export default function Privacy() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="log-out-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Sessão</Text>
+              <Text style={styles.sectionTitle}>{t("sessionSection")}</Text>
             </View>
 
             <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
               <Ionicons name="exit-outline" size={20} color={COLORS.primaryDark} />
-              <Text style={styles.actionButtonText}>Sair da conta</Text>
+              <Text style={styles.actionButtonText}>{t("logoutAccountButton")}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

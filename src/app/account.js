@@ -37,12 +37,14 @@ import {
   updateUserPassword,
   updateUserPhoto,
 } from "../db";
+import { useLanguage } from "../i18n";
 
 // regex = expressão regular que valida se o email tem formato correto
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AccountSettings() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -83,8 +85,8 @@ export default function AccountSettings() {
       await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert(
-        "Permissão necessária",
-        "Precisamos de acesso às suas fotos para escolher uma imagem de perfil.",
+        t("permissionRequired"),
+        t("permissionRequiredMessage"),
       );
       return;
     }
@@ -114,10 +116,10 @@ export default function AccountSettings() {
       await initDatabase();
       await updateUserPhoto(user.id, photo ?? null);
       setUser({ ...user, photo: photo ?? null });
-      Alert.alert("Sucesso", "Sua foto de perfil foi atualizada.");
+      Alert.alert(t("success"), t("photoUpdated"));
     } catch (error) {
       console.error("Erro ao salvar foto:", error);
-      Alert.alert("Erro", "Não foi possível salvar a foto. Tente novamente.");
+      Alert.alert(t("error"), t("photoSaveError"));
     }
   };
 
@@ -128,10 +130,10 @@ export default function AccountSettings() {
       await updateUserPhoto(user.id, null);
       setPhoto(null);
       setUser({ ...user, photo: null });
-      Alert.alert("Sucesso", "Sua foto de perfil foi removida.");
+      Alert.alert(t("success"), t("photoRemoved"));
     } catch (error) {
       console.error("Erro ao remover foto:", error);
-      Alert.alert("Erro", "Não foi possível remover a foto. Tente novamente.");
+      Alert.alert(t("error"), t("photoRemoveError"));
     }
   };
 
@@ -141,13 +143,13 @@ export default function AccountSettings() {
     const emailValue = email.trim().toLowerCase();
     if (!nameValue || !emailValue) {
       Alert.alert(
-        "Campos obrigatórios",
-        "Preencha o nome e o email para continuar.",
+        t("requiredFields"),
+        t("requiredFieldsAccountMessage"),
       );
       return;
     }
     if (!EMAIL_REGEX.test(emailValue)) {
-      Alert.alert("Email inválido", "Digite um endereço de email válido.");
+      Alert.alert(t("invalidEmail"), t("invalidEmailMessage"));
       return;
     }
     try {
@@ -156,8 +158,8 @@ export default function AccountSettings() {
       const existing = await getUserByEmail(emailValue);
       if (existing && existing.id !== user.id) {
         Alert.alert(
-          "Email já cadastrado",
-          "Este email já está em uso por outra conta.",
+          t("emailAlreadyRegistered"),
+          t("emailInUseMessage"),
         );
         return;
       }
@@ -165,10 +167,10 @@ export default function AccountSettings() {
       await updateUserEmail(user.id, emailValue);
       await setSetting("currentUserName", nameValue);
       setUser({ ...user, name: nameValue, email: emailValue });
-      Alert.alert("Sucesso", "Seus dados foram atualizados.");
+      Alert.alert(t("success"), t("dataUpdated"));
     } catch (error) {
       console.error("Erro ao atualizar conta:", error);
-      Alert.alert("Erro", "Não foi possível atualizar. Tente novamente.");
+      Alert.alert(t("error"), t("updateError"));
     }
   };
 
@@ -176,43 +178,43 @@ export default function AccountSettings() {
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
       Alert.alert(
-        "Campos obrigatórios",
-        "Informe a senha atual e a nova senha.",
+        t("requiredFields"),
+        t("passwordRequiredMessage"),
       );
       return;
     }
     if (newPassword.length < 6) {
       Alert.alert(
-        "Senha muito curta",
-        "A nova senha precisa ter pelo menos 6 caracteres.",
+        t("passwordTooShort"),
+        t("passwordTooShortMessage"),
       );
       return;
     }
     try {
       await initDatabase();
       if (currentPassword !== user.password) {
-        Alert.alert("Senha atual incorreta", "Verifique a senha atual.");
+        Alert.alert(t("wrongCurrentPassword"), t("wrongCurrentPasswordMessage"));
         return;
       }
       await updateUserPassword(user.id, newPassword);
       setCurrentPassword("");
       setNewPassword("");
-      Alert.alert("Sucesso", "Sua senha foi alterada.");
+      Alert.alert(t("success"), t("passwordChanged"));
     } catch (error) {
       console.error("Erro ao alterar senha:", error);
-      Alert.alert("Erro", "Não foi possível alterar a senha.");
+      Alert.alert(t("error"), t("passwordChangeError"));
     }
   };
 
   // exclui a conta permanentemente (mostra aviso antes)
   const handleDeleteAccount = () => {
     Alert.alert(
-      "Excluir conta",
-      "Todos os seus dados (contatos, diário, metas e configurações) serão apagados para sempre. Tem certeza?",
+      t("deleteAccountTitle"),
+      t("deleteAccountMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Excluir",
+          text: t("delete"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -223,7 +225,7 @@ export default function AccountSettings() {
               router.replace("/login");
             } catch (error) {
               console.error("Erro ao excluir conta:", error);
-              Alert.alert("Erro", "Não foi possível excluir a conta.");
+              Alert.alert(t("error"), t("deleteAccountError"));
             }
           },
         },
@@ -247,7 +249,7 @@ export default function AccountSettings() {
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
         <ScreenHeader
-          title="Configurações da Conta"
+          title={t("accountSettingsTitle")}
           onBackPress={() => router.back()}
         />
 
@@ -264,7 +266,7 @@ export default function AccountSettings() {
                 size={22}
                 color={COLORS.primary}
               />
-              <Text style={styles.sectionTitle}>Dados pessoais</Text>
+              <Text style={styles.sectionTitle}>{t("personalDataSection")}</Text>
             </View>
 
             {/* área da foto de perfil */}
@@ -285,7 +287,7 @@ export default function AccountSettings() {
                   size={18}
                   color={COLORS.primary}
                 />
-                <Text style={styles.photoButtonText}>Escolher foto</Text>
+                <Text style={styles.photoButtonText}>{t("choosePhotoButton")}</Text>
               </TouchableOpacity>
               {photo ? (
                 <TouchableOpacity
@@ -300,32 +302,32 @@ export default function AccountSettings() {
                   <Text
                     style={[styles.photoButtonText, styles.removePhotoText]}
                   >
-                    Remover foto
+                    {t("removePhotoButton")}
                   </Text>
                 </TouchableOpacity>
               ) : null}
               <AnimatedButton
-                title="Salvar foto"
+                title={t("savePhotoButton")}
                 onPress={handleSavePhoto}
                 style={styles.savePhotoButton}
               />
             </View>
 
             {/* campos de nome e email */}
-            <Text style={styles.label}>Nome completo</Text>
+            <Text style={styles.label}>{t("nameLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Seu nome"
+              placeholder={t("yourNamePlaceholder")}
               placeholderTextColor={COLORS.textGray}
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
             />
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t("emailLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Seu email"
+              placeholder={t("yourEmailPlaceholder")}
               placeholderTextColor={COLORS.textGray}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -335,7 +337,7 @@ export default function AccountSettings() {
             />
 
             <AnimatedButton
-              title="Salvar alterações"
+              title={t("saveChangesButton")}
               onPress={handleSaveProfile}
               style={styles.saveButton}
             />
@@ -349,23 +351,23 @@ export default function AccountSettings() {
                 size={22}
                 color={COLORS.primary}
               />
-              <Text style={styles.sectionTitle}>Alterar senha</Text>
+              <Text style={styles.sectionTitle}>{t("changePasswordSection")}</Text>
             </View>
 
-            <Text style={styles.label}>Senha atual</Text>
+            <Text style={styles.label}>{t("currentPasswordLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Digite sua senha atual"
+              placeholder={t("currentPasswordPlaceholder")}
               placeholderTextColor={COLORS.textGray}
               secureTextEntry
               value={currentPassword}
               onChangeText={setCurrentPassword}
             />
 
-            <Text style={styles.label}>Nova senha</Text>
+            <Text style={styles.label}>{t("newPasswordLabel")}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Mínimo de 6 caracteres"
+              placeholder={t("newPasswordPlaceholder")}
               placeholderTextColor={COLORS.textGray}
               secureTextEntry
               value={newPassword}
@@ -373,7 +375,7 @@ export default function AccountSettings() {
             />
 
             <AnimatedButton
-              title="Alterar senha"
+              title={t("changePasswordButton")}
               onPress={handleChangePassword}
               style={styles.saveButton}
             />
@@ -387,7 +389,7 @@ export default function AccountSettings() {
                 size={22}
                 color={COLORS.primary}
               />
-              <Text style={styles.sectionTitle}>Sessão</Text>
+              <Text style={styles.sectionTitle}>{t("sessionSection")}</Text>
             </View>
 
             <TouchableOpacity
@@ -399,7 +401,7 @@ export default function AccountSettings() {
                 size={20}
                 color={COLORS.primaryDark}
               />
-              <Text style={styles.actionButtonText}>Sair da conta</Text>
+              <Text style={styles.actionButtonText}>{t("logoutAccountButton")}</Text>
             </TouchableOpacity>
           </View>
 
@@ -412,7 +414,7 @@ export default function AccountSettings() {
                 color={COLORS.danger}
               />
               <Text style={[styles.sectionTitle, styles.dangerTitle]}>
-                Zona de perigo
+                {t("dangerZoneSection")}
               </Text>
             </View>
 
@@ -422,7 +424,7 @@ export default function AccountSettings() {
             >
               <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
               <Text style={[styles.actionButtonText, styles.dangerText]}>
-                Excluir minha conta
+                {t("deleteMyAccountButton")}
               </Text>
             </TouchableOpacity>
           </View>

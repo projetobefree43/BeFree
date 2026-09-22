@@ -16,12 +16,14 @@ import {
 } from "react-native";
 import { AnimatedScreen } from "../components/animated-screen";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { useLanguage } from "../i18n";
 
 // tempo que o som de alerta fica tocando (em segundos)
 const SOS_ALERT_DURATION_SECONDS = 5;
 
 export default function SOS() {
   const router = useRouter();
+  const { t } = useLanguage();
   // player é o "reprodutor" de áudio. aqui ele carrega o arquivo de som de alerta
   const player = useAudioPlayer(require("../../assets/audio/sos-alert.wav"));
   // useRef guarda uma referência pro timer de parada do som
@@ -59,18 +61,18 @@ export default function SOS() {
   // primeiro mostra um aviso perguntando se tem certeza
   const handleSOS = () => {
     Alert.alert(
-      "Ativar SOS?",
-      "Um alerta de emergência será enviado para seus contatos de confiança.",
+      t("sosConfirmTitle"),
+      t("sosConfirmMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Ativar",
+          text: t("activate"),
           onPress: () => {
             // se o usuário confirmar, toca o som e mostra orientação
             playAlert();
             Alert.alert(
-              "SOS Ativado",
-              "Alerta enviado para seus contatos de confiança. Fique em um local seguro e aguarde ajuda."
+              t("sosActivatedTitle"),
+              t("sosActivatedMessage")
             );
           },
         },
@@ -92,15 +94,15 @@ export default function SOS() {
           showsVerticalScrollIndicator={false}
         >
           <Ionicons name="alert-circle" size={80} color={COLORS.white} />
-          <Text style={styles.title}>Botão SOS / Pânico</Text>
-          <Text style={styles.subtitle}>Intervenção imediata</Text>
+          <Text style={styles.title}>{t("sosTitle")}</Text>
+          <Text style={styles.subtitle}>{t("sosSubtitle")}</Text>
           <Text style={styles.description}>
-            Clique para ativar o sistema de emergência.
+            {t("sosDescription")}
           </Text>
 
           {/* Botão grande de ativação */}
           <TouchableOpacity style={styles.sosButton} onPress={handleSOS}>
-            <Text style={styles.sosButtonText}>ATIVAR SOS</Text>
+            <Text style={styles.sosButtonText}>{t("sosActivateButton")}</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>

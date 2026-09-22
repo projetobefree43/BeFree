@@ -21,50 +21,39 @@ import {
 import { AnimatedScreen } from "../components/animated-screen";
 import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { useLanguage } from "../i18n";
 
-// lista de perguntas frequentes e suas respostas
+// lista de perguntas frequentes (as chaves apontam pra uma tradução)
 const FAQ = [
-  {
-    q: "Como funciona o botão SOS?",
-    a: "Ao tocar em \"Ativar SOS\", um alerta de emergência é emitido com um som de 5 segundos e o app mostra as orientações. Edite seus contatos de confiança na Rede de Apoio.",
-  },
-  {
-    q: "Onde meus dados são armazenados?",
-    a: "Tudo fica salvo somente no seu aparelho, em banco local. Nenhuma informação é enviada para servidores. Você pode apagar tudo em Perfil → Privacidade e Segurança.",
-  },
-  {
-    q: "Como editar ou remover um contato?",
-    a: "Abra a Rede de Apoio, toque no contato e use os botões de editar ou excluir.",
-  },
-  {
-    q: "Como altero minha senha?",
-    a: "Vá em Perfil → Privacidade e Segurança ou em Configurações da Conta e use o campo \"Alterar senha\".",
-  },
-  {
-    q: "Preciso de ajuda agora. O que faço?",
-    a: "Toque no botão SOS ou ligue gratuitamente para o CVV (188) ou SAMU (192). Você não está sozinho.",
-  },
+  { qKey: "faq1q", aKey: "faq1a" },
+  { qKey: "faq2q", aKey: "faq2a" },
+  { qKey: "faq3q", aKey: "faq3a" },
+  { qKey: "faq4q", aKey: "faq4a" },
+  { qKey: "faq5q", aKey: "faq5a" },
 ];
 
 // função que abre links externos (telefone, e-mail, etc.)
-const openExternalUrl = async (url) => {
+const openExternalUrl = async (url, alertTitle, alertMessage) => {
   try {
     await Linking.openURL(url);
   } catch (_) {
-    Alert.alert("Não foi possível abrir", "Tente novamente mais tarde.");
+    Alert.alert(alertTitle, alertMessage);
   }
 };
 
 export default function Help() {
   const router = useRouter();
+  const { t } = useLanguage();
   // expandedIndex controla qual pergunta do FAQ tá aberta (nenhuma = null)
   const [expandedIndex, setExpandedIndex] = useState(null);
+
+  const openLink = (url) => openExternalUrl(url, t("openFailed"), t("tryLater"));
 
   return (
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
         <ScreenHeader
-          title="Ajuda e Suporte"
+          title={t("helpTitle")}
           onBackPress={() => router.back()}
         />
 
@@ -76,19 +65,19 @@ export default function Help() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="medkit-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Contatos de emergência</Text>
+              <Text style={styles.sectionTitle}>{t("emergencyContactsSection")}</Text>
             </View>
 
             {/* CVV - quando clica, abre a tela de ligação do celular */}
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => openExternalUrl("tel:188")}
+              onPress={() => openLink("tel:188")}
             >
               <Ionicons name="heart-outline" size={20} color={COLORS.danger} />
               <View style={styles.actionInfo}>
-                <Text style={styles.actionTitle}>CVV - Centro de Valorização da Vida</Text>
+                <Text style={styles.actionTitle}>{t("cvvTitle")}</Text>
                 <Text style={styles.actionSubtitle}>
-                  Ligação gratuita, 24h por dia. Disque 188
+                  {t("cvvSubtitle")}
                 </Text>
               </View>
               <Ionicons name="call-outline" size={20} color={COLORS.primary} />
@@ -97,13 +86,13 @@ export default function Help() {
             {/* SAMU */}
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => openExternalUrl("tel:192")}
+              onPress={() => openLink("tel:192")}
             >
               <Ionicons name="ambulance" size={20} color={COLORS.danger} />
               <View style={styles.actionInfo}>
-                <Text style={styles.actionTitle}>SAMU</Text>
+                <Text style={styles.actionTitle}>{t("samuTitle")}</Text>
                 <Text style={styles.actionSubtitle}>
-                  Emergência médica. Disque 192
+                  {t("samuSubtitle")}
                 </Text>
               </View>
               <Ionicons name="call-outline" size={20} color={COLORS.primary} />
@@ -114,20 +103,20 @@ export default function Help() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="chatbubbles-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Fale com a gente</Text>
+              <Text style={styles.sectionTitle}>{t("contactUsSection")}</Text>
             </View>
 
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() =>
-                openExternalUrl(
+                openLink(
                   "mailto:projetobefree43@gmail.com?subject=Ajuda%20e%20Suporte"
                 )
               }
             >
               <Ionicons name="mail-outline" size={20} color={COLORS.primary} />
               <View style={styles.actionInfo}>
-                <Text style={styles.actionTitle}>E-mail de suporte</Text>
+                <Text style={styles.actionTitle}>{t("supportEmailTitle")}</Text>
                 <Text style={styles.actionSubtitle}>projetobefree43@gmail.com</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={COLORS.textGray} />
@@ -138,7 +127,7 @@ export default function Help() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="flash-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Acesso rápido</Text>
+              <Text style={styles.sectionTitle}>{t("quickAccessSection")}</Text>
             </View>
 
             <TouchableOpacity
@@ -147,8 +136,8 @@ export default function Help() {
             >
               <Ionicons name="account-group-outline" size={20} color={COLORS.primary} />
               <View style={styles.actionInfo}>
-                <Text style={styles.actionTitle}>Rede de Apoio</Text>
-                <Text style={styles.actionSubtitle}>Gerencie seus contatos de confiança</Text>
+                <Text style={styles.actionTitle}>{t("supportNetworkTitle")}</Text>
+                <Text style={styles.actionSubtitle}>{t("supportNetworkSubtitle")}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={COLORS.textGray} />
             </TouchableOpacity>
@@ -159,8 +148,8 @@ export default function Help() {
             >
               <Ionicons name="alert-circle-outline" size={20} color={COLORS.danger} />
               <View style={styles.actionInfo}>
-                <Text style={styles.actionTitle}>Botão SOS / Pânico</Text>
-                <Text style={styles.actionSubtitle}>Ative o alerta de emergência</Text>
+                <Text style={styles.actionTitle}>{t("sosQuickAccessTitle")}</Text>
+                <Text style={styles.actionSubtitle}>{t("sosQuickAccessSubtitle")}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={COLORS.textGray} />
             </TouchableOpacity>
@@ -170,7 +159,7 @@ export default function Help() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="help-circle-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Perguntas frequentes</Text>
+              <Text style={styles.sectionTitle}>{t("faqSection")}</Text>
             </View>
 
             {FAQ.map((item, index) => {
@@ -181,7 +170,7 @@ export default function Help() {
                     style={styles.faqHeader}
                     onPress={() => setExpandedIndex(open ? null : index)}
                   >
-                    <Text style={styles.faqQuestion}>{item.q}</Text>
+                    <Text style={styles.faqQuestion}>{t(item.qKey)}</Text>
                     <Ionicons
                       name={open ? "chevron-up" : "chevron-down"}
                       size={20}
@@ -189,7 +178,7 @@ export default function Help() {
                     />
                   </TouchableOpacity>
                   {/* a resposta só aparece se a pergunta tiver aberta */}
-                  {open && <Text style={styles.faqAnswer}>{item.a}</Text>}
+                  {open && <Text style={styles.faqAnswer}>{t(item.aKey)}</Text>}
                 </View>
               );
             })}
@@ -199,14 +188,13 @@ export default function Help() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="information-circle-outline" size={22} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>Sobre o BeFree</Text>
+              <Text style={styles.sectionTitle}>{t("aboutSection")}</Text>
             </View>
 
             <View style={styles.infoBox}>
               <Ionicons name="leaf-outline" size={20} color={COLORS.primary} />
               <Text style={styles.infoText}>
-                BeFree é um aplicativo de apoio ao bem-estar com dados salvos
-                localmente. Versão 1.0.0.
+                {t("aboutText")}
               </Text>
             </View>
           </View>

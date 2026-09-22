@@ -5,14 +5,17 @@
 
 import { Stack } from "expo-router";
 import { COLORS } from "../constants/styles";
+import { LanguageProvider } from "../i18n";
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: COLORS.background },
-      }}
-    />
+    <LanguageProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: COLORS.background },
+        }}
+      />
+    </LanguageProvider>
   );
 }

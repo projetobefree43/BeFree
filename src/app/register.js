@@ -26,9 +26,11 @@ import {
     initDatabase,
     setSetting,
 } from "../db";
+import { useLanguage } from "../i18n";
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,8 +43,8 @@ export default function RegisterScreen() {
     // verifica se todos os campos foram preenchidos
     if (!nameValue || !emailValue || !password) {
       Alert.alert(
-        "Campos obrigatórios",
-        "Preencha nome, email e senha para continuar."
+        t("requiredFields"),
+        t("requiredFieldsRegisterMessage")
       );
       return;
     }
@@ -50,15 +52,15 @@ export default function RegisterScreen() {
     // verifica se o email tem um formato válido (tem @ e .)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailValue)) {
-      Alert.alert("Email inválido", "Digite um endereço de email válido.");
+      Alert.alert(t("invalidEmail"), t("invalidEmailMessage"));
       return;
     }
 
     // a senha precisa ter pelo menos 6 caracteres
     if (password.length < 6) {
       Alert.alert(
-        "Senha muito curta",
-        "A senha precisa ter pelo menos 6 caracteres."
+        t("passwordTooShort"),
+        t("passwordTooShortMessage")
       );
       return;
     }
@@ -70,8 +72,8 @@ export default function RegisterScreen() {
       const existing = await getUserByEmail(emailValue);
       if (existing) {
         Alert.alert(
-          "Email já cadastrado",
-          "Já existe uma conta com este email. Tente entrar."
+          t("emailAlreadyRegistered"),
+          t("emailAlreadyRegisteredMessage")
         );
         return;
       }
@@ -86,8 +88,8 @@ export default function RegisterScreen() {
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
       Alert.alert(
-        "Erro",
-        "Não foi possível criar a conta. Tente novamente."
+        t("error"),
+        t("registerErrorMessage")
       );
     }
   };
@@ -114,17 +116,17 @@ export default function RegisterScreen() {
 
             {/* Cabeçalho com título */}
             <View style={styles.header}>
-              <Text style={styles.title}>Criar Conta</Text>
-              <Text style={styles.subtitle}>Sua liberdade começa aqui!</Text>
+              <Text style={styles.title}>{t("registerTitle")}</Text>
+              <Text style={styles.subtitle}>{t("registerSubtitle")}</Text>
             </View>
 
             {/* Formulário com os 3 campos */}
             <View style={styles.form}>
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Nome completo</Text>
+                <Text style={styles.label}>{t("nameLabel")}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Digite seu nome"
+                  placeholder={t("namePlaceholder")}
                   placeholderTextColor={COLORS.textGray}
                   value={name}
                   onChangeText={setName}
@@ -133,10 +135,10 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email</Text>
+                <Text style={styles.label}>{t("emailLabel")}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Digite seu email"
+                  placeholder={t("emailPlaceholder")}
                   placeholderTextColor={COLORS.textGray}
                   value={email}
                   onChangeText={setEmail}
@@ -146,10 +148,10 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Senha</Text>
+                <Text style={styles.label}>{t("passwordLabel")}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Digite sua senha"
+                  placeholder={t("passwordPlaceholder")}
                   placeholderTextColor={COLORS.textGray}
                   value={password}
                   onChangeText={setPassword}
@@ -159,7 +161,7 @@ export default function RegisterScreen() {
 
               {/* Botão de cadastrar */}
               <AnimatedButton
-                title="Criar Conta"
+                title={t("createAccountButton")}
                 onPress={handleRegister}
                 style={styles.submitButton}
               />
@@ -167,9 +169,9 @@ export default function RegisterScreen() {
 
             {/* Link pra ir pra tela de login */}
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Já tem uma conta? </Text>
+              <Text style={styles.footerText}>{t("haveAccount")}</Text>
               <TouchableOpacity onPress={() => router.push("/login")}>
-                <Text style={styles.loginLink}>Entrar</Text>
+                <Text style={styles.loginLink}>{t("loginButton")}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

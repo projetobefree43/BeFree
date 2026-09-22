@@ -24,9 +24,11 @@ import {
     initDatabase,
     removeSetting,
 } from "../db";
+import { useLanguage } from "../i18n";
 
 export default function Profile() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [name, setName] = useState("Sophia Darini");
   const [email, setEmail] = useState("sophia.darini@email.com");
   const [photo, setPhoto] = useState(null);
@@ -67,7 +69,7 @@ export default function Profile() {
   return (
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Perfil" onBackPress={() => router.back()} />
+        <ScreenHeader title={t("profileTitle")} onBackPress={() => router.back()} />
 
         <ScrollView contentContainerStyle={styles.content}>
           {/* Card com foto, nome e email */}
@@ -89,34 +91,34 @@ export default function Profile() {
 
           {/* Seção de informações básicas */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Informações</Text>
-            <InfoBox label="Membro desde:" value="Janeiro 2024" />
-            <InfoBox label="Sequência atual:" value="7 dias" />
+            <Text style={styles.sectionTitle}>{t("infoSection")}</Text>
+            <InfoBox label={t("memberSinceLabel")} value={t("memberSinceValue")} />
+            <InfoBox label={t("streakLabel")} value={t("streakValue")} />
           </View>
 
           {/* Seção de configurações (abre outras telas) */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Configurações</Text>
+            <Text style={styles.sectionTitle}>{t("settingsSection")}</Text>
             <MenuItemButton
               icon="settings"
-              label="Configurações da Conta"
+              label={t("accountSettingsLabel")}
               onPress={() => router.push("/account")}
             />
             <MenuItemButton
               icon="lock"
-              label="Privacidade e Segurança"
+              label={t("privacySettingsLabel")}
               onPress={() => router.push("/privacy")}
             />
             <MenuItemButton
               icon="help-circle"
-              label="Ajuda e Suporte"
+              label={t("helpSupportLabel")}
               onPress={() => router.push("/help")}
             />
           </View>
 
           {/* Botão de logout */}
           <AnimatedButton
-            title="Sair da Conta"
+            title={t("logoutButton")}
             onPress={handleLogout}
             style={styles.logoutButton}
             textStyle={styles.logoutText}

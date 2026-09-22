@@ -8,9 +8,11 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { AnimatedScreen } from "../components/animated-screen";
 import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { useLanguage } from "../i18n";
 
 export default function Achievements() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   // lista de conquistas que o usuário pode desbloquear
   const achievements = [
@@ -18,28 +20,39 @@ export default function Achievements() {
       id: 1,
       icon: "star",
       title: "Primeira Conquista",
+      titleKey: "firstAchievementTitle",
       description: "Completou 1 dia",
+      descriptionKey: "firstAchievementDesc",
     },
-    { id: 2, icon: "fire", title: "Sequência", description: "7 dias seguidos" },
+    {
+      id: 2,
+      icon: "fire",
+      title: "Sequência",
+      titleKey: "streakAchievementTitle",
+      description: "7 dias seguidos",
+      descriptionKey: "streakAchievementDesc",
+    },
     {
       id: 3,
       icon: "trophy",
       title: "Campeão",
+      titleKey: "championAchievementTitle",
       description: "30 dias de vitórias",
+      descriptionKey: "championAchievementDesc",
     },
   ];
 
   return (
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
-        <ScreenHeader title="Conquistas" onBackPress={() => router.back()} />
+        <ScreenHeader title={t("achievementsTitle")} onBackPress={() => router.back()} />
 
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.subtitle}>Gamificação & Metas</Text>
+          <Text style={styles.subtitle}>{t("achievementsSubtitle")}</Text>
 
           {/* barra de progresso (estática por enquanto) */}
           <View style={styles.progressBox}>
-            <Text style={styles.progressLabel}>Progresso: 40%</Text>
+            <Text style={styles.progressLabel}>{t("progressLabel")}</Text>
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: "40%" }]} />
             </View>
@@ -54,9 +67,9 @@ export default function Achievements() {
                 color={COLORS.warning}
               />
               <View style={styles.achievementInfo}>
-                <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                <Text style={styles.achievementTitle}>{t(achievement.titleKey)}</Text>
                 <Text style={styles.achievementDesc}>
-                  {achievement.description}
+                  {t(achievement.descriptionKey)}
                 </Text>
               </View>
             </View>

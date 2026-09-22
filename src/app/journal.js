@@ -28,6 +28,7 @@ import {
     insertEntry,
     updateEntry,
 } from "../db";
+import { useLanguage } from "../i18n";
 
 // formata a data de hoje no formato "Segunda-feira, 3 de set."
 const formatTodayLabel = () => {
@@ -42,6 +43,7 @@ const formatTodayLabel = () => {
 
 export default function Journal() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [entries, setEntries] = useState([]);
   const [userId, setUserId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -95,8 +97,8 @@ export default function Journal() {
     // o gatilho é obrigatório (as outras duas opções são facultativas)
     if (!triggerValue) {
       Alert.alert(
-        "Campo obrigatório",
-        "Descreva o gatilho que você identificou para continuar."
+        t("requiredField"),
+        t("requiredTriggerMessage")
       );
       return;
     }
@@ -161,12 +163,12 @@ export default function Journal() {
   // pergunta se tem certeza antes de apagar um registro
   const handleDeleteEntry = (entry) => {
     Alert.alert(
-      "Excluir registro",
-      "Tem certeza que deseja excluir este registro?",
+      t("deleteEntryTitle"),
+      t("deleteEntryMessage"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("cancel"), style: "cancel" },
         {
-          text: "Excluir",
+          text: t("delete"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -187,12 +189,12 @@ export default function Journal() {
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
         <ScreenHeader
-          title="Diário de Gatilhos"
+          title={t("journalTitle")}
           onBackPress={() => router.back()}
         />
 
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.subtitle}>Mapeamento Emocional</Text>
+          <Text style={styles.subtitle}>{t("journalSubtitle")}</Text>
 
           {/* mostra todos os registros do diário */}
           {entries.map((entry) => (
@@ -230,11 +232,13 @@ export default function Journal() {
                 </View>
               </View>
               <Text style={styles.entryTrigger}>
-                Gatilho: {entry.trigger}
+                {t("entryTrigger", { value: entry.trigger })}
               </Text>
-              <Text style={styles.entryEmotion}>Emoção: {entry.emotion}</Text>
+              <Text style={styles.entryEmotion}>
+                {t("entryEmotion", { value: entry.emotion })}
+              </Text>
               <Text style={styles.entryResponse}>
-                Resposta: {entry.response}
+                {t("entryResponse", { value: entry.response })}
               </Text>
             </View>
           ))}
@@ -245,7 +249,7 @@ export default function Journal() {
             onPress={openNewEntry}
           >
             <Ionicons name="add" size={24} color={COLORS.white} />
-            <Text style={styles.addButtonText}>Novo Registro</Text>
+            <Text style={styles.addButtonText}>{t("newEntryButton")}</Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -262,31 +266,31 @@ export default function Journal() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
               <Text style={styles.modalTitle}>
-                {editingEntry ? "Editar Registro" : "Novo Registro"}
+                {editingEntry ? t("modalEditEntryTitle") : t("modalNewEntryTitle")}
               </Text>
 
-              <Text style={styles.modalLabel}>Gatilho</Text>
+              <Text style={styles.modalLabel}>{t("triggerLabel")}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="O que aconteceu?"
+                placeholder={t("triggerPlaceholder")}
                 placeholderTextColor={COLORS.textGray}
                 value={trigger}
                 onChangeText={setTrigger}
               />
 
-              <Text style={styles.modalLabel}>Emoção</Text>
+              <Text style={styles.modalLabel}>{t("emotionLabel")}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Como você se sentiu?"
+                placeholder={t("emotionPlaceholder")}
                 placeholderTextColor={COLORS.textGray}
                 value={emotion}
                 onChangeText={setEmotion}
               />
 
-              <Text style={styles.modalLabel}>Resposta</Text>
+              <Text style={styles.modalLabel}>{t("responseLabel")}</Text>
               <TextInput
                 style={[styles.modalInput, styles.modalMultiline]}
-                placeholder="Como você reagiu?"
+                placeholder={t("responsePlaceholder")}
                 placeholderTextColor={COLORS.textGray}
                 multiline
                 value={response}
@@ -301,13 +305,13 @@ export default function Journal() {
                     setModalVisible(false);
                   }}
                 >
-                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                  <Text style={styles.modalCancelText}>{t("cancel")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalConfirmButton}
                   onPress={handleSaveEntry}
                 >
-                  <Text style={styles.modalConfirmText}>Salvar</Text>
+                  <Text style={styles.modalConfirmText}>{t("save")}</Text>
                 </TouchableOpacity>
               </View>
             </View>

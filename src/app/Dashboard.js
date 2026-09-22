@@ -25,6 +25,7 @@ import Animated, {
 import { AnimatedScreen } from "../components/animated-screen";
 import { MenuCard } from "../components/menu-card";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
+import { useLanguage } from "../i18n";
 import {
   getCurrentUserId,
   getPrivacySettings,
@@ -35,6 +36,7 @@ import {
 
 export default function Dashboard() {
   const router = useRouter();
+  const { language, setLanguage, t } = useLanguage();
   const [userName, setUserName] = useState("");
   const [userPhoto, setUserPhoto] = useState(null);
   const [hideName, setHideName] = useState(false);
@@ -65,28 +67,36 @@ export default function Dashboard() {
     {
       id: "3",
       title: "Rede de Apoio",
+      titleKey: "supportCardTitle",
       subtitle: "Gestão de contatos",
+      subtitleKey: "supportCardSubtitle",
       icon: "account-group-outline",
       route: "/support",
     },
     {
       id: "4",
       title: "Painel do Relógio",
+      titleKey: "watchCardTitle",
       subtitle: "BeFree Sync ativo",
+      subtitleKey: "watchCardSubtitle",
       icon: "watch-variant",
       route: "/watch",
     },
     {
       id: "5",
       title: "Diário de Gatilhos",
+      titleKey: "journalCardTitle",
       subtitle: "Mapeamento Emocional",
+      subtitleKey: "journalCardSubtitle",
       icon: "heart-pulse",
       route: "/journal",
     },
     {
       id: "6",
       title: "Conquistas",
+      titleKey: "achievementsCardTitle",
       subtitle: "Gamificação & Metas",
+      subtitleKey: "achievementsCardSubtitle",
       icon: "trophy-outline",
       route: "/achievements",
     },
@@ -100,11 +110,36 @@ export default function Dashboard() {
           <View style={styles.header}>
             <View style={styles.headerInfo}>
               <Text style={styles.greeting}>
-                {hideName ? "Olá! 👋" : `Olá, ${userName || "Sophia"}! 👋`}
+                {hideName
+                  ? `${t("greeting")}! 👋`
+                  : t("greetingWithName", { name: userName || "Sophia" })}
               </Text>
               <Text style={styles.subGreeting}>
-                Pronta para mais um dia de escolhas livres?
+                {t("subGreeting")}
               </Text>
+            </View>
+            {/* Seletor de idioma PT/EN */}
+            <View style={styles.langToggle}>
+              <TouchableOpacity
+                style={[styles.langOption, language === "pt" && styles.langOptionActive]}
+                onPress={() => setLanguage("pt")}
+              >
+                <Text
+                  style={[styles.langOptionText, language === "pt" && styles.langOptionTextActive]}
+                >
+                  PT
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.langOption, language === "en" && styles.langOptionActive]}
+                onPress={() => setLanguage("en")}
+              >
+                <Text
+                  style={[styles.langOptionText, language === "en" && styles.langOptionTextActive]}
+                >
+                  EN
+                </Text>
+              </TouchableOpacity>
             </View>
             <TouchableOpacity
               style={styles.headerPhoto}
@@ -130,7 +165,7 @@ export default function Dashboard() {
               style={styles.bannerIcon}
             />
             <Text style={styles.bannerText}>
-              {"\u201CCada escolha certa te aproxima da sua melhor versão.\u201D"}
+              {t("bannerText")}
             </Text>
           </View>
 
@@ -139,8 +174,8 @@ export default function Dashboard() {
             {cards.map((card) => (
               <MenuCard
                 key={card.id}
-                title={card.title}
-                subtitle={card.subtitle}
+                title={t(card.titleKey)}
+                subtitle={t(card.subtitleKey)}
                 icon={card.icon}
                 bgColor={card.bgColor}
                 onPress={() => router.push(card.route)}
@@ -158,6 +193,7 @@ export default function Dashboard() {
 // botão SOS com animação de pulso (mesmo conceito do home.js)
 function SosButton({ onPress }) {
   const pulse = useSharedValue(1);
+  const { t } = useLanguage();
 
   useEffect(() => {
     pulse.value = withRepeat(
@@ -185,7 +221,7 @@ function SosButton({ onPress }) {
       >
         <Ionicons name="alert-circle-outline" size={56} color={COLORS.white} />
         <Text style={styles.sosText}>SOS</Text>
-        <Text style={styles.sosSubText}>Pressione em emergência</Text>
+        <Text style={styles.sosSubText}>{t("sosSubText")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -194,12 +230,13 @@ function SosButton({ onPress }) {
 // barra de navegação inferior
 function BottomNav() {
   const router = useRouter();
+  const { t } = useLanguage();
   return (
     <View style={styles.bottomBar}>
       {[
-        { icon: "home", label: "Início", route: "/home", active: true },
-        { icon: "search-outline", label: "Buscar", route: "/search" },
-        { icon: "person-outline", label: "Perfil", route: "/profile" },
+        { icon: "home", labelKey: "bottomNavHome", route: "/home", active: true },
+        { icon: "search-outline", labelKey: "bottomNavSearch", route: "/search" },
+        { icon: "person-outline", labelKey: "bottomNavProfile", route: "/profile" },
       ].map((tab, idx) => (
         <TouchableOpacity
           key={idx}
@@ -212,7 +249,7 @@ function BottomNav() {
             color={tab.active ? "#4A6B3E" : "#888"}
           />
           <Text style={[styles.tabText, tab.active && styles.tabActive]}>
-            {tab.label}
+            {t(tab.labelKey)}
           </Text>
         </TouchableOpacity>
       ))}
@@ -265,6 +302,30 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
+  },
+  langToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 3,
+    marginRight: SPACING.sm,
+  },
+  langOption: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 9,
+  },
+  langOptionActive: {
+    backgroundColor: COLORS.primary,
+  },
+  langOptionText: {
+    fontSize: FONT_SIZES.small,
+    fontWeight: "bold",
+    color: COLORS.textGray,
+  },
+  langOptionTextActive: {
+    color: COLORS.white,
   },
   sosSection: {
     alignItems: "center",

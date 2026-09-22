@@ -9,9 +9,11 @@ import { Modal, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpa
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 import { AnimatedScreen } from "../components/animated-screen";
 import { getCurrentUserId, getWatchSettings, initDatabase, setSetting } from "../db";
+import { useLanguage } from "../i18n";
 
 export default function Watch() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [modalVisible, setModalVisible] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [vibration, setVibration] = useState(true);
@@ -74,21 +76,21 @@ export default function Watch() {
           showsVerticalScrollIndicator={false}
         >
           <Ionicons name="watch" size={80} color={COLORS.primary} />
-          <Text style={styles.title}>Painel do Relógio</Text>
-          <Text style={styles.subtitle}>BeFree Sync ativo</Text>
+          <Text style={styles.title}>{t("watchTitle")}</Text>
+          <Text style={styles.subtitle}>{t("watchSubtitle")}</Text>
 
           {/* Mostra se o relógio tá conectado ou não */}
           <View style={styles.statusBox}>
-            <Text style={styles.statusLabel}>Status da conexão:</Text>
+            <Text style={styles.statusLabel}>{t("connectionStatusLabel")}</Text>
             <Text style={styles.statusValue}>
-              {connected ? "🟢 Conectado" : "🔴 Desconectado"}
+              {connected ? t("connected") : t("disconnected")}
             </Text>
           </View>
 
           {/* Caixa informativa */}
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              Seu relógio inteligente está sincronizado com o BeFree. Receba notificações em tempo real!
+              {t("watchInfoText")}
             </Text>
           </View>
 
@@ -97,7 +99,7 @@ export default function Watch() {
             style={styles.button}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={styles.buttonText}>Abrir Configurações</Text>
+            <Text style={styles.buttonText}>{t("openSettingsButton")}</Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -110,13 +112,13 @@ export default function Watch() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>Configurações do Sync</Text>
+              <Text style={styles.modalTitle}>{t("syncSettingsTitle")}</Text>
 
               {/* Switch = botão de ligar/desligar (tipo o do iPhone) */}
               <View style={styles.settingRow}>
                 <View style={styles.settingInfo}>
-                  <Text style={styles.settingLabel}>Notificações em tempo real</Text>
-                  <Text style={styles.settingHint}>Recebe alertas de recaída</Text>
+                  <Text style={styles.settingLabel}>{t("realtimeNotificationsLabel")}</Text>
+                  <Text style={styles.settingHint}>{t("relapseAlertsHint")}</Text>
                 </View>
                 <Switch
                   value={notifications}
@@ -127,8 +129,8 @@ export default function Watch() {
 
               <View style={styles.settingRow}>
                 <View style={styles.settingInfo}>
-                  <Text style={styles.settingLabel}>Vibração no pulso</Text>
-                  <Text style={styles.settingHint}>Alerta físico ao estresse</Text>
+                  <Text style={styles.settingLabel}>{t("wristVibrationLabel")}</Text>
+                  <Text style={styles.settingHint}>{t("stressAlertHint")}</Text>
                 </View>
                 <Switch
                   value={vibration}
@@ -141,7 +143,7 @@ export default function Watch() {
                 style={styles.modalCloseButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.modalCloseText}>Fechar</Text>
+                <Text style={styles.modalCloseText}>{t("closeButton")}</Text>
               </TouchableOpacity>
             </View>
           </View>

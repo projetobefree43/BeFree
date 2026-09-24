@@ -232,6 +232,33 @@ export async function updateUserPassword(id, password) {
   await db.runAsync("UPDATE users SET password = ? WHERE id = ?", password, id);
 }
 
+// redefine a senha quando o usuário esquece (opção "esqueceu a senha").
+// valida os dados, confere se o email existe e atualiza a senha no banco local.
+// lança um Error com mensagem amigável quando algo dá errado.
+export async function resetPassword({ email, newPassword, confirmPassword }) {
+  const emailValue = email.trim().toLowerCase();
+
+  if (!emailValue || !newPassword || !confirmPassword) {
+    throw new Error("Preencha o email e os dois campos de senha.");
+  }
+  if (newPassword !== confirmPassword) {
+    throw new Error("As senhas não coincidem.");
+  }
+  if (newPassword.length < 6) {
+    throw new Error("A senha deve ter no mínimo 6 caracteres.");
+  }
+
+  const user = await getUserByEmail(emailValue);
+  if (!user) {
+    throw new Error("Não encontramos nenhuma conta com este email.");
+  }
+
+  // as senhas do app são salvas sem hash e comparadas direto no login,
+  // então aqui só atualizamos o valor direto no banco
+  await updateUserPassword(user.id, newPassword);
+  return true;
+}
+
 // atualiza a foto de perfil do usuário
 export async function updateUserPhoto(id, photo) {
   const db = await getDb();

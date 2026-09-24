@@ -84,10 +84,7 @@ export default function AccountSettings() {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert(
-        t("permissionRequired"),
-        t("permissionRequiredMessage"),
-      );
+      Alert.alert(t("permissionRequired"), t("permissionRequiredMessage"));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -142,10 +139,7 @@ export default function AccountSettings() {
     const nameValue = name.trim();
     const emailValue = email.trim().toLowerCase();
     if (!nameValue || !emailValue) {
-      Alert.alert(
-        t("requiredFields"),
-        t("requiredFieldsAccountMessage"),
-      );
+      Alert.alert(t("requiredFields"), t("requiredFieldsAccountMessage"));
       return;
     }
     if (!EMAIL_REGEX.test(emailValue)) {
@@ -157,10 +151,7 @@ export default function AccountSettings() {
       // verifica se já existe outro usuário com esse email
       const existing = await getUserByEmail(emailValue);
       if (existing && existing.id !== user.id) {
-        Alert.alert(
-          t("emailAlreadyRegistered"),
-          t("emailInUseMessage"),
-        );
+        Alert.alert(t("emailAlreadyRegistered"), t("emailInUseMessage"));
         return;
       }
       await updateUserName(user.id, nameValue);
@@ -177,23 +168,20 @@ export default function AccountSettings() {
   // altera a senha (verifica se a senha atual tá correta primeiro)
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
-      Alert.alert(
-        t("requiredFields"),
-        t("passwordRequiredMessage"),
-      );
+      Alert.alert(t("requiredFields"), t("passwordRequiredMessage"));
       return;
     }
     if (newPassword.length < 6) {
-      Alert.alert(
-        t("passwordTooShort"),
-        t("passwordTooShortMessage"),
-      );
+      Alert.alert(t("passwordTooShort"), t("passwordTooShortMessage"));
       return;
     }
     try {
       await initDatabase();
       if (currentPassword !== user.password) {
-        Alert.alert(t("wrongCurrentPassword"), t("wrongCurrentPasswordMessage"));
+        Alert.alert(
+          t("wrongCurrentPassword"),
+          t("wrongCurrentPasswordMessage"),
+        );
         return;
       }
       await updateUserPassword(user.id, newPassword);
@@ -208,29 +196,25 @@ export default function AccountSettings() {
 
   // exclui a conta permanentemente (mostra aviso antes)
   const handleDeleteAccount = () => {
-    Alert.alert(
-      t("deleteAccountTitle"),
-      t("deleteAccountMessage"),
-      [
-        { text: t("cancel"), style: "cancel" },
-        {
-          text: t("delete"),
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await initDatabase();
-              await deleteUser(user.id);
-              await removeSetting("currentUserId");
-              await removeSetting("currentUserName");
-              router.replace("/login");
-            } catch (error) {
-              console.error("Erro ao excluir conta:", error);
-              Alert.alert(t("error"), t("deleteAccountError"));
-            }
-          },
+    Alert.alert(t("deleteAccountTitle"), t("deleteAccountMessage"), [
+      { text: t("cancel"), style: "cancel" },
+      {
+        text: t("delete"),
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await initDatabase();
+            await deleteUser(user.id);
+            await removeSetting("currentUserId");
+            await removeSetting("currentUserName");
+            router.replace("/login");
+          } catch (error) {
+            console.error("Erro ao excluir conta:", error);
+            Alert.alert(t("error"), t("deleteAccountError"));
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   // logout: limpa sessão e manda pro login
@@ -266,7 +250,9 @@ export default function AccountSettings() {
                 size={22}
                 color={COLORS.primary}
               />
-              <Text style={styles.sectionTitle}>{t("personalDataSection")}</Text>
+              <Text style={styles.sectionTitle}>
+                {t("personalDataSection")}
+              </Text>
             </View>
 
             {/* área da foto de perfil */}
@@ -287,7 +273,9 @@ export default function AccountSettings() {
                   size={18}
                   color={COLORS.primary}
                 />
-                <Text style={styles.photoButtonText}>{t("choosePhotoButton")}</Text>
+                <Text style={styles.photoButtonText}>
+                  {t("choosePhotoButton")}
+                </Text>
               </TouchableOpacity>
               {photo ? (
                 <TouchableOpacity
@@ -351,7 +339,9 @@ export default function AccountSettings() {
                 size={22}
                 color={COLORS.primary}
               />
-              <Text style={styles.sectionTitle}>{t("changePasswordSection")}</Text>
+              <Text style={styles.sectionTitle}>
+                {t("changePasswordSection")}
+              </Text>
             </View>
 
             <Text style={styles.label}>{t("currentPasswordLabel")}</Text>
@@ -401,7 +391,9 @@ export default function AccountSettings() {
                 size={20}
                 color={COLORS.primaryDark}
               />
-              <Text style={styles.actionButtonText}>{t("logoutAccountButton")}</Text>
+              <Text style={styles.actionButtonText}>
+                {t("logoutAccountButton")}
+              </Text>
             </TouchableOpacity>
           </View>
 

@@ -28,11 +28,12 @@ import {
     getPrivacySettings,
     getUserById,
     initDatabase,
-    removeSetting,
+    clearSession,
     resetDatabase,
     setPrivacySettings,
     updateUserPassword,
 } from "../db";
+import { verifyPassword } from "../security";
 import { useLanguage } from "../i18n";
 
 export default function Privacy() {
@@ -97,7 +98,8 @@ export default function Privacy() {
         Alert.alert(t("error"), t("userNotFound"));
         return;
       }
-      if (currentPassword !== user.password) {
+      const passwordResult = await verifyPassword(currentPassword, user.password);
+      if (!passwordResult.valid) {
         Alert.alert(t("wrongCurrentPassword"), t("wrongCurrentPasswordMessage"));
         return;
       }
@@ -126,6 +128,7 @@ export default function Privacy() {
             try {
               await initDatabase();
               await resetDatabase();
+              await clearSession();
               router.replace("/welcome");
             } catch (error) {
               console.error("Erro ao apagar dados:", error);
@@ -141,8 +144,7 @@ export default function Privacy() {
   const handleLogout = async () => {
     try {
       await initDatabase();
-      await removeSetting("currentUserId");
-      await removeSetting("currentUserName");
+      await clearSession();
       router.replace("/login");
     } catch (error) {
       console.error("Erro ao sair:", error);

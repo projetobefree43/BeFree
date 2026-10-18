@@ -15,7 +15,8 @@
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/logo.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.gpierri7.BeFree"
     },
     "web": {
       "output": "static",
@@ -40,11 +41,18 @@
           "cameraPermission": "O BeFree acessa sua câmera para que você possa tirar uma foto de perfil.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b5380b64-a7f1-40c9-b772-7baa7d904171"
+      }
     }
   }
 }

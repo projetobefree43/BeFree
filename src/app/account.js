@@ -26,17 +26,18 @@ import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 import {
   deleteUser,
+  clearSession,
   getCurrentUserId,
   getUserByEmail,
   getUserById,
   initDatabase,
-  removeSetting,
   setSetting,
   updateUserEmail,
   updateUserName,
   updateUserPassword,
   updateUserPhoto,
 } from "../db";
+import { verifyPassword } from "../security";
 import { useLanguage } from "../i18n";
 
 // regex = expressão regular que valida se o email tem formato correto
@@ -177,7 +178,8 @@ export default function AccountSettings() {
     }
     try {
       await initDatabase();
-      if (currentPassword !== user.password) {
+      const passwordResult = await verifyPassword(currentPassword, user.password);
+      if (!passwordResult.valid) {
         Alert.alert(
           t("wrongCurrentPassword"),
           t("wrongCurrentPasswordMessage"),
@@ -205,8 +207,7 @@ export default function AccountSettings() {
           try {
             await initDatabase();
             await deleteUser(user.id);
-            await removeSetting("currentUserId");
-            await removeSetting("currentUserName");
+            await clearSession();
             router.replace("/login");
           } catch (error) {
             console.error("Erro ao excluir conta:", error);
@@ -221,8 +222,7 @@ export default function AccountSettings() {
   const handleLogout = async () => {
     try {
       await initDatabase();
-      await removeSetting("currentUserId");
-      await removeSetting("currentUserName");
+      await clearSession();
       router.replace("/login");
     } catch (error) {
       console.error("Erro ao sair:", error);

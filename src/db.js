@@ -4,6 +4,22 @@
 // tudo fica salvo direto no celular do usuário (banco local), sem servidor.
 
 import * as SQLite from "expo-sqlite";
+import { Platform } from "react-native";
+import { hashPassword } from "./security";
+
+// O módulo só existe em builds que já foram recompiladas com expo-secure-store.
+// O fallback permite que uma build antiga continue abrindo até a atualização.
+let SecureStore = null;
+try {
+  SecureStore = require("expo-secure-store");
+} catch {
+  SecureStore = null;
+}
+
+let hasSecureStore =
+  Platform.OS !== "web" &&
+  typeof SecureStore?.getItemAsync === "function" &&
+  typeof SecureStore?.setItemAsync === "function";
 
 // nome e versão do banco de dados. a versão serve pra gente poder
 // atualizar as tabelas do banco sem perder os dados do usuário
@@ -13,6 +29,7 @@ const DATABASE_VERSION = 3;
 // variável que guarda a "promessa" de conexão com o banco
 // (uma promessa é tipo uma garantia de que o banco vai abrir, só que pode demorar)
 let dbPromise = null;
+let initPromise = null;
 
 // essa função abre o banco uma única vez e reutiliza a mesma conexão
 function getDb() {
@@ -25,9 +42,28 @@ function getDb() {
 // função auxiliar pra converter texto "true"/"1" em valor booleano (verdadeiro/falso)
 const toBool = (value) => value === "true" || value === "1";
 
+// Confere a estrutura atual antes de aplicar uma migração.
+// Assim, se a migração tiver sido executada parcialmente, ela pode ser
+// repetida sem tentar criar a mesma coluna duas vezes.
+async function hasColumn(db, tableName, columnName) {
+  const columns = await db.getAllAsync(`PRAGMA table_info(${tableName})`);
+  return columns.some((column) => column.name === columnName);
+}
+
 // essa função cria todas as tabelas do banco na primeira vez que o app roda,
 // e também atualiza o banco se a gente mudar algo nas tabelas em uma versão nova
-export async function initDatabase() {
+// Garante que telas montadas ao mesmo tempo não executem a migração em paralelo.
+export function initDatabase() {
+  if (!initPromise) {
+    initPromise = initializeDatabase().catch((error) => {
+      initPromise = null;
+      throw error;
+    });
+  }
+  return initPromise;
+}
+
+async function initializeDatabase() {
   const db = await getDb();
   const result = await db.getFirstAsync("PRAGMA user_version");
   let currentVersion = result?.user_version ?? 0;
@@ -58,7 +94,7 @@ CREATE TABLE IF NOT EXISTS journal_entries (
   created_at INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS support_contacts (
-  id INTEGER PRIMARY KEY KEY AUTOINCREMENT NOT NULL,
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
   created_at INTEGER NOT NULL
@@ -69,45 +105,21 @@ CREATE TABLE IF NOT EXISTS settings (
 );
     `);
 
-    // dados de exemplo pro diário (pra o usuário não ver a tela vazia)
-    await db.runAsync(
-      "INSERT INTO journal_entries (date_label, trigger, emotion, response, created_at) VALUES (?, ?, ?, ?, ?)",
-      "Hoje",
-      "Discussão com colega",
-      "Raiva/Frustração",
-      "Respirei fundo e pedi para conversar depois",
-      Date.now()
-    );
-
-    // contatos de exemplo na rede de apoio
-    await db.runAsync(
-      "INSERT INTO support_contacts (name, phone, created_at) VALUES (?, ?, ?)",
-      "Mãe",
-      "(11) 98765-4321",
-      Date.now()
-    );
-    await db.runAsync(
-      "INSERT INTO support_contacts (name, phone, created_at) VALUES (?, ?, ?)",
-      "Melhor Amiga",
-      "(21) 99876-5432",
-      Date.now()
-    );
-    await db.runAsync(
-      "INSERT INTO support_contacts (name, phone, created_at) VALUES (?, ?, ?)",
-      "Terapeuta",
-      "(11) 3456-7890",
-      Date.now()
-    );
-
     currentVersion = 1;
   }
 
   // versão 1 → 2: adiciona coluna user_id pra ligar diário e contatos ao usuário
   if (currentVersion === 1) {
-    await db.execAsync(`
-ALTER TABLE journal_entries ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE support_contacts ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0;
-    `);
+    if (!(await hasColumn(db, "journal_entries", "user_id"))) {
+      await db.execAsync(
+        "ALTER TABLE journal_entries ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0"
+      );
+    }
+    if (!(await hasColumn(db, "support_contacts", "user_id"))) {
+      await db.execAsync(
+        "ALTER TABLE support_contacts ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0"
+      );
+    }
     const firstUser = await db.getFirstAsync("SELECT MIN(id) AS userId FROM users");
     const firstUserId = firstUser?.userId ?? null;
 
@@ -130,9 +142,11 @@ ALTER TABLE support_contacts ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0;
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'economy_goals'"
     );
     if (hasGoals) {
-      await db.execAsync(
-        "ALTER TABLE economy_goals ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0"
-      );
+      if (!(await hasColumn(db, "economy_goals", "user_id"))) {
+        await db.execAsync(
+          "ALTER TABLE economy_goals ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0"
+        );
+      }
       await assignOrClear("economy_goals");
     }
 
@@ -141,9 +155,9 @@ ALTER TABLE support_contacts ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0;
 
   // versão 2 → 3: adiciona coluna de foto no perfil do usuário
   if (currentVersion === 2) {
-    await db.execAsync(
-      "ALTER TABLE users ADD COLUMN photo TEXT"
-    );
+    if (!(await hasColumn(db, "users", "photo"))) {
+      await db.execAsync("ALTER TABLE users ADD COLUMN photo TEXT");
+    }
     currentVersion = 3;
   }
 
@@ -153,51 +167,18 @@ ALTER TABLE support_contacts ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0;
 
 // ===== USUÁRIOS =====
 
-// cria um usuário novo com nome, email e senha, e já cria dados de exemplo pra ele
+// cria um usuário novo com a senha protegida; os dados pessoais começam vazios
 export async function createUser({ name, email, password }) {
   const db = await getDb();
+  const passwordHash = await hashPassword(password);
   const result = await db.runAsync(
     "INSERT INTO users (name, email, password, created_at) VALUES (?, ?, ?, ?)",
     name,
     email,
-    password,
+    passwordHash,
     Date.now()
   );
   const userId = result.lastInsertRowId;
-
-  // cria um registro de exemplo no diário
-  await db.runAsync(
-    "INSERT INTO journal_entries (user_id, date_label, trigger, emotion, response, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-    userId,
-    "Hoje",
-    "Discussão com colega",
-    "Raiva/Frustração",
-    "Respirei fundo e pedi para conversar depois",
-    Date.now()
-  );
-
-  // cria contatos de exemplo na rede de apoio
-  await db.runAsync(
-    "INSERT INTO support_contacts (user_id, name, phone, created_at) VALUES (?, ?, ?, ?)",
-    userId,
-    "Mãe",
-    "(11) 98765-4321",
-    Date.now()
-  );
-  await db.runAsync(
-    "INSERT INTO support_contacts (user_id, name, phone, created_at) VALUES (?, ?, ?, ?)",
-    userId,
-    "Melhor Amiga",
-    "(21) 99876-5432",
-    Date.now()
-  );
-  await db.runAsync(
-    "INSERT INTO support_contacts (user_id, name, phone, created_at) VALUES (?, ?, ?, ?)",
-    userId,
-    "Terapeuta",
-    "(11) 3456-7890",
-    Date.now()
-  );
 
   return userId;
 }
@@ -205,7 +186,11 @@ export async function createUser({ name, email, password }) {
 // busca um usuário pelo email (usado no login)
 export async function getUserByEmail(email) {
   const db = await getDb();
-  return db.getFirstAsync("SELECT * FROM users WHERE email = ?", email);
+  const normalizedEmail = String(email ?? "").trim().toLowerCase();
+  return db.getFirstAsync(
+    "SELECT * FROM users WHERE LOWER(TRIM(email)) = ?",
+    normalizedEmail
+  );
 }
 
 // busca um usuário pelo id (usado pra carregar dados na tela de perfil)
@@ -229,33 +214,37 @@ export async function updateUserEmail(id, email) {
 // atualiza a senha do usuário
 export async function updateUserPassword(id, password) {
   const db = await getDb();
-  await db.runAsync("UPDATE users SET password = ? WHERE id = ?", password, id);
+  const passwordHash = await hashPassword(password);
+  await db.runAsync("UPDATE users SET password = ? WHERE id = ?", passwordHash, id);
 }
 
-// redefine a senha quando o usuário esquece (opção "esqueceu a senha").
-// valida os dados, confere se o email existe e atualiza a senha no banco local.
-// lança um Error com mensagem amigável quando algo dá errado.
+// Redefinição simples e local: não depende de Crypto, SecureStore,
+// servidor ou envio de email. No próximo login, a senha será protegida
+// automaticamente pelo fluxo normal de autenticação.
 export async function resetPassword({ email, newPassword, confirmPassword }) {
-  const emailValue = email.trim().toLowerCase();
+  const emailValue = String(email ?? "").trim().toLowerCase();
 
   if (!emailValue || !newPassword || !confirmPassword) {
-    throw new Error("Preencha o email e os dois campos de senha.");
+    throw new Error("RESET_REQUIRED_FIELDS");
   }
   if (newPassword !== confirmPassword) {
-    throw new Error("As senhas não coincidem.");
+    throw new Error("RESET_PASSWORD_MISMATCH");
   }
   if (newPassword.length < 6) {
-    throw new Error("A senha deve ter no mínimo 6 caracteres.");
+    throw new Error("RESET_PASSWORD_TOO_SHORT");
   }
 
-  const user = await getUserByEmail(emailValue);
-  if (!user) {
-    throw new Error("Não encontramos nenhuma conta com este email.");
+  const db = await getDb();
+  const result = await db.runAsync(
+    "UPDATE users SET password = ? WHERE LOWER(TRIM(email)) = ?",
+    `legacy$compatibility-salt$${newPassword}`,
+    emailValue
+  );
+
+  if (!result?.changes) {
+    throw new Error("RESET_ACCOUNT_NOT_FOUND");
   }
 
-  // as senhas do app são salvas sem hash e comparadas direto no login,
-  // então aqui só atualizamos o valor direto no banco
-  await updateUserPassword(user.id, newPassword);
   return true;
 }
 
@@ -271,11 +260,12 @@ export async function deleteUser(id) {
   await db.runAsync("DELETE FROM journal_entries WHERE user_id = ?", id);
   await db.runAsync("DELETE FROM support_contacts WHERE user_id = ?", id);
   await db.runAsync(
-    "DELETE FROM settings WHERE key IN (?, ?, ?, ?)",
+    "DELETE FROM settings WHERE key IN (?, ?, ?, ?, ?)",
     `watch.notifications.${id}`,
     `watch.vibration.${id}`,
     "currentUserId",
-    "currentUserName"
+    "currentUserName",
+    `privacy.hideName.${id}`
   );
   await db.runAsync("DELETE FROM users WHERE id = ?", id);
 }
@@ -284,8 +274,55 @@ export async function deleteUser(id) {
 
 // pega o id do usuário que tá logado agora (tá guardado como config)
 export async function getCurrentUserId() {
+  if (hasSecureStore) {
+    try {
+      const secureValue = await SecureStore.getItemAsync("befree.currentUserId");
+      if (secureValue) return Number(secureValue);
+    } catch {
+      hasSecureStore = false;
+    }
+  }
+
   const value = await getSetting("currentUserId");
-  return value ? Number(value) : null;
+  if (!value) return null;
+
+  if (hasSecureStore) {
+    try {
+      await SecureStore.setItemAsync("befree.currentUserId", value);
+    } catch {
+      hasSecureStore = false;
+    }
+  }
+  if (hasSecureStore) {
+    await removeSetting("currentUserId");
+  }
+  return Number(value);
+}
+
+export async function saveSession(userId, userName) {
+  if (hasSecureStore && typeof SecureStore.setItemAsync === "function") {
+    try {
+      await SecureStore.setItemAsync("befree.currentUserId", String(userId));
+    } catch {
+      hasSecureStore = false;
+      await setSetting("currentUserId", String(userId));
+    }
+  } else {
+    await setSetting("currentUserId", String(userId));
+  }
+  await setSetting("currentUserName", userName);
+}
+
+export async function clearSession() {
+  if (hasSecureStore && typeof SecureStore.deleteItemAsync === "function") {
+    try {
+      await SecureStore.deleteItemAsync("befree.currentUserId");
+    } catch {
+      hasSecureStore = false;
+    }
+  }
+  await removeSetting("currentUserId");
+  await removeSetting("currentUserName");
 }
 
 // lê uma configuração qualquer pelo nome da chave

@@ -19,10 +19,10 @@ import { InfoBox } from "../components/info-box";
 import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 import {
-    getSetting,
+    getCurrentUserId,
     getUserById,
     initDatabase,
-    removeSetting,
+    clearSession,
 } from "../db";
 import { useLanguage } from "../i18n";
 
@@ -38,7 +38,7 @@ export default function Profile() {
     const loadUser = async () => {
       try {
         await initDatabase();
-        const sessionUserId = await getSetting("currentUserId");
+        const sessionUserId = await getCurrentUserId();
         if (sessionUserId) {
           const user = await getUserById(Number(sessionUserId));
           if (user) {
@@ -58,8 +58,7 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await initDatabase();
-      await removeSetting("currentUserId");
-      await removeSetting("currentUserName");
+      await clearSession();
       router.replace("/login");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);

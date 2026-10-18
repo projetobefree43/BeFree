@@ -37,7 +37,7 @@ O projeto é **misto**:
 
 - **State local do React** (`useState`/`useEffect`) nas telas.
 - **Persistência em SQLite** via `expo-sqlite` (ver "Armazenamento local").
-- **Não** usa Redux, Zustand, MobX ou Context API.
+- Usa Context API apenas para o idioma; não usa Redux, Zustand ou MobX.
 
 ## Estilização
 
@@ -56,9 +56,11 @@ O projeto é **misto**:
 
 - **Sem backend remoto.** Aplicação 100% local.
 - Não há chamadas a Firebase, Supabase ou qualquer serviço HTTP.
-- Única integração externa: `expo-image-picker` (escolha de foto de perfil da
-  galeria/câmera, armazenada localmente como base64) e `expo-web-browser` /
-  `expo-linking` (abrir URLs no navegador), ambos em funcionalidades pontuais.
+- Integrações de dispositivo: `expo-image-picker` (foto de perfil), `expo-audio`
+  (alerta local da simulação SOS), `expo-crypto` (hash de senha) e
+  `expo-secure-store` (sessão).
+- `expo-web-browser` / `expo-linking` são usados para abrir URLs, chamadas e
+  email na tela de suporte.
 - `help.js` usa `Linking.openURL` para chamadas telefônicas/email de suporte.
 
 ## Armazenamento local
@@ -67,9 +69,10 @@ O projeto é **misto**:
   `src/db.js`.
   - Tabelas: `users`, `journal_entries`, `support_contacts`, `settings`.
   - Migrações por `PRAGMA user_version` (versão atual: 3).
-- **`@react-native-async-storage/async-storage`** (`~3.1.1`) está listado como
-  dependência, porém o código efetivamente usa SQLite para todo o
-  armazenamento (o AsyncStorage não é importado em nenhum arquivo atualmente).
+- Senhas são armazenadas com hash SHA-256 e salt; o identificador da sessão fica
+  no SecureStore do dispositivo.
+- O armazenamento de preferências continua no SQLite; a sessão usa o
+  `expo-secure-store`.
 
 ## Ferramentas de build / dev
 
@@ -91,7 +94,8 @@ O projeto é **misto**:
   `react-native-worklets` (`0.10.1`);
   `expo-glass-effect` e `expo-symbols` presentes no template.
 - **UI nativa**: `@expo/ui` (`~57.0.10`).
-- **Áudio**: `expo-audio` (`~57.0.4`) — usado na tela SOS (`sos-alert.wav`).
+- **Áudio**: `expo-audio` (`~57.0.4`) — usado no alerta local da simulação SOS (`sos-alert.wav`).
+- **Segurança**: `expo-crypto` para hash das senhas e `expo-secure-store` para a sessão.
 - **Mídia**: `expo-image-picker` (`~57.0.15`).
 - **Suporte multi-plataforma**: `react-native-safe-area-context`,
   `react-native-screens` (usados pelo Expo Router);
@@ -119,7 +123,6 @@ BeFree/
 │   │   ├── login.js        #   Login
 │   │   ├── register.js     #   Cadastro
 │   │   ├── home.js         #   Tela principal (hub)
-│   │   ├── Dashboard.js    #   Cópia visual de home.js (duplicada)
 │   │   ├── journal.js      #   Diário de gatilhos
 │   │   ├── sos.js          #   Botão SOS / pânico
 │   │   ├── support.js      #   Rede de apoio (contatos)

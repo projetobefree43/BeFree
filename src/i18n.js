@@ -57,15 +57,16 @@ export const translations = {
     // tela SOS
     sosTitle: "Botão SOS / Pânico",
     sosSubtitle: "Intervenção imediata",
-    sosDescription: "Clique para ativar o sistema de emergência.",
+    sosDescription:
+      "Esta é uma simulação acadêmica: o app toca um alerta local e mostra uma orientação. Nenhuma mensagem é enviada.",
     sosActivateButton: "ATIVAR SOS",
     sosConfirmTitle: "Ativar SOS?",
     sosConfirmMessage:
-      "Um alerta de emergência será enviado para seus contatos de confiança.",
+      "A simulação tocará um alerta local por cinco segundos. Nenhuma mensagem será enviada.",
     activate: "Ativar",
     sosActivatedTitle: "SOS Ativado",
     sosActivatedMessage:
-      "Alerta enviado para seus contatos de confiança. Fique em um local seguro e aguarde ajuda.",
+      "Simulação concluída. O alerta foi apenas local e não houve envio para contatos.",
 
     // tela de boas-vindas
     welcomeTitle: "Você merece\numa vida livre.",
@@ -78,6 +79,15 @@ export const translations = {
     loginSubtitle: "Bom te ter de volta!",
     rememberMe: "Lembrar de mim",
     forgotPassword: "Esqueceu a senha?",
+    forgotPasswordTitle: "Redefinir senha",
+    forgotPasswordSubtitle: "Informe seu email e escolha uma nova senha.",
+    confirmPasswordPlaceholder: "Repita a nova senha",
+    resetPasswordButton: "Redefinir senha",
+    passwordResetSuccess: "Sua senha foi redefinida. Agora você já pode entrar.",
+    passwordResetError: "Não foi possível redefinir a senha.",
+    passwordResetRequiredMessage: "Preencha o email e os dois campos de senha.",
+    passwordsDoNotMatch: "Senhas diferentes",
+    passwordsDoNotMatchMessage: "As duas senhas precisam ser iguais.",
     noAccount: "Não tem conta? ",
     signUpLink: "Cadastre-se",
     requiredFieldsLoginMessage: "Preencha o email e a senha para entrar.",
@@ -267,12 +277,13 @@ export const translations = {
 
     // painel do relógio
     watchTitle: "Painel do Relógio",
-    watchSubtitle: "BeFree Sync ativo",
+    watchSubtitle: "Painel de simulação",
     connectionStatusLabel: "Status da conexão:",
     connected: "🟢 Conectado",
     disconnected: "🔴 Desconectado",
+    simulationMode: "🟡 Simulação local",
     watchInfoText:
-      "Seu relógio inteligente está sincronizado com o BeFree. Receba notificações em tempo real!",
+      "As opções abaixo simulam configurações do relógio. A comunicação com hardware ainda será desenvolvida.",
     openSettingsButton: "Abrir Configurações",
     syncSettingsTitle: "Configurações do Sync",
     realtimeNotificationsLabel: "Notificações em tempo real",
@@ -334,15 +345,16 @@ export const translations = {
     // SOS screen
     sosTitle: "SOS / Panic Button",
     sosSubtitle: "Immediate intervention",
-    sosDescription: "Tap to activate the emergency system.",
+    sosDescription:
+      "This is an academic simulation: the app plays a local alert and shows guidance. No message is sent.",
     sosActivateButton: "ACTIVATE SOS",
     sosConfirmTitle: "Activate SOS?",
     sosConfirmMessage:
-      "An emergency alert will be sent to your trusted contacts.",
+      "The simulation will play a local alert for five seconds. No message will be sent.",
     activate: "Activate",
     sosActivatedTitle: "SOS Activated",
     sosActivatedMessage:
-      "Alert sent to your trusted contacts. Stay in a safe place and wait for help.",
+      "Simulation completed. The alert was local only and no contact was notified.",
 
     // welcome screen
     welcomeTitle: "You deserve\na free life.",
@@ -355,6 +367,15 @@ export const translations = {
     loginSubtitle: "Good to have you back!",
     rememberMe: "Remember me",
     forgotPassword: "Forgot your password?",
+    forgotPasswordTitle: "Reset password",
+    forgotPasswordSubtitle: "Enter your email and choose a new password.",
+    confirmPasswordPlaceholder: "Repeat the new password",
+    resetPasswordButton: "Reset password",
+    passwordResetSuccess: "Your password was reset. You can log in now.",
+    passwordResetError: "Could not reset the password.",
+    passwordResetRequiredMessage: "Enter your email and both password fields.",
+    passwordsDoNotMatch: "Passwords do not match",
+    passwordsDoNotMatchMessage: "Both passwords must be the same.",
     noAccount: "Don't have an account? ",
     signUpLink: "Sign up",
     requiredFieldsLoginMessage: "Fill in your email and password to log in.",
@@ -546,12 +567,13 @@ export const translations = {
 
     // watch panel
     watchTitle: "Watch Panel",
-    watchSubtitle: "BeFree Sync active",
+    watchSubtitle: "Simulation panel",
     connectionStatusLabel: "Connection status:",
     connected: "🟢 Connected",
     disconnected: "🔴 Disconnected",
+    simulationMode: "🟡 Local simulation",
     watchInfoText:
-      "Your smartwatch is synced with BeFree. Get real-time notifications!",
+      "The options below simulate watch settings. Hardware communication will be developed in a future stage.",
     openSettingsButton: "Open Settings",
     syncSettingsTitle: "Sync Settings",
     realtimeNotificationsLabel: "Real-time notifications",

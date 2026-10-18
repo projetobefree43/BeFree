@@ -1,5 +1,5 @@
 // essa é a tela do Painel do Relógio. aqui o usuário configura como o
-// relógio inteligente (wearable) se comunica com o app.
+// relógio inteligente (wearable) poderá se comunicar com o app.
 // ele pode ligar/desligar notificações e vibração do relógio.
 
 import { Ionicons } from "@expo/vector-icons";
@@ -61,9 +61,6 @@ export default function Watch() {
     persistSettings({ notifications, vibration: next });
   };
 
-  // se pelo menos uma das duas opções tá ligada, o relógio tá "conectado"
-  const connected = notifications || vibration;
-
   return (
     <AnimatedScreen>
       <SafeAreaView style={styles.container}>
@@ -83,7 +80,7 @@ export default function Watch() {
           <View style={styles.statusBox}>
             <Text style={styles.statusLabel}>{t("connectionStatusLabel")}</Text>
             <Text style={styles.statusValue}>
-              {connected ? t("connected") : t("disconnected")}
+              {t("simulationMode")}
             </Text>
           </View>
 

@@ -8,6 +8,7 @@ import { useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
+    Modal,
     Platform,
     SafeAreaView,
     ScrollView,
@@ -20,7 +21,14 @@ import {
 import { AnimatedButton } from "../components/animated-button";
 import { AnimatedScreen } from "../components/animated-screen";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
-import { getUserByEmail, initDatabase, setSetting } from "../db";
+import {
+  getUserByEmail,
+  initDatabase,
+  resetPassword,
+  saveSession,
+  updateUserPassword,
+} from "../db";
+import { verifyPassword } from "../security";
 import { useLanguage } from "../i18n";
 
 export default function Login() {
@@ -32,6 +40,10 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [forgotVisible, setForgotVisible] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
 
   // essa função roda quando o usuário clica no botão "Entrar"
   const handleLogin = async () => {
@@ -60,20 +72,62 @@ export default function Login() {
       }
 
       // verifica se a senha bate com a que tá no banco
-      if (user.password !== password) {
+      const passwordResult = await verifyPassword(password, user.password);
+      if (!passwordResult.valid) {
         Alert.alert(t("wrongPassword"), t("wrongPasswordMessage"));
         return;
       }
 
+      if (passwordResult.needsUpgrade) {
+        await updateUserPassword(user.id, password);
+      }
+
       // se tudo certo, salva o id e nome do usuário como "sessão ativa"
       // e manda pra tela principal
-      await setSetting("currentUserId", String(user.id));
-      await setSetting("currentUserName", user.name);
+      await saveSession(user.id, user.name);
       router.replace("/home");
     } catch (error) {
       console.error("Erro ao entrar:", error);
       Alert.alert(t("error"), t("loginErrorMessage"));
     }
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      await initDatabase();
+      await resetPassword({
+        email: resetEmail,
+        newPassword: resetNewPassword,
+        confirmPassword: resetConfirmPassword,
+      });
+      setForgotVisible(false);
+      setResetEmail("");
+      setResetNewPassword("");
+      setResetConfirmPassword("");
+      Alert.alert(t("success"), t("passwordResetSuccess"));
+    } catch (error) {
+      const code = String(error?.message ?? error ?? "");
+      console.error("Erro ao redefinir senha:", error);
+      if (code === "RESET_REQUIRED_FIELDS") {
+        Alert.alert(t("requiredFields"), t("passwordResetRequiredMessage"));
+      } else if (code === "RESET_PASSWORD_MISMATCH") {
+        Alert.alert(t("passwordsDoNotMatch"), t("passwordsDoNotMatchMessage"));
+      } else if (code === "RESET_PASSWORD_TOO_SHORT") {
+        Alert.alert(t("passwordTooShort"), t("passwordTooShortMessage"));
+      } else if (code === "RESET_ACCOUNT_NOT_FOUND") {
+        Alert.alert(t("accountNotFound"), t("accountNotFoundMessage"));
+      } else {
+        Alert.alert(
+          t("error"),
+          __DEV__ && code ? `${t("passwordResetError")}\n\n${code}` : t("passwordResetError")
+        );
+      }
+    }
+  };
+
+  const openResetPassword = () => {
+    setResetEmail(email.trim().toLowerCase());
+    setForgotVisible(true);
   };
 
   return (
@@ -107,7 +161,7 @@ export default function Login() {
               <TextInput
                 style={styles.input}
                 placeholder={t("emailPlaceholder")}
-                placeholderTextColor={COLORS.textGray}
+                placeholderTextColor="#65705F"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -121,7 +175,7 @@ export default function Login() {
               <TextInput
                 style={styles.input}
                 placeholder={t("passwordPlaceholder")}
-                placeholderTextColor={COLORS.textGray}
+                placeholderTextColor="#65705F"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
@@ -141,7 +195,7 @@ export default function Login() {
                 />
                 <Text style={styles.checkboxLabel}>{t("rememberMe")}</Text>
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={openResetPassword}>
                 <Text style={styles.forgotPassword}>{t("forgotPassword")}</Text>
               </TouchableOpacity>
             </View>
@@ -161,6 +215,58 @@ export default function Login() {
               </TouchableOpacity>
             </View>
           </ScrollView>
+
+          <Modal
+            visible={forgotVisible}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setForgotVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalCard}>
+                <Text style={styles.modalTitle}>{t("forgotPasswordTitle")}</Text>
+                <Text style={styles.modalSubtitle}>{t("forgotPasswordSubtitle")}</Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder={t("emailPlaceholder")}
+                  placeholderTextColor="#65705F"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={resetEmail}
+                  onChangeText={setResetEmail}
+                />
+                <TextInput
+                  style={[styles.input, styles.modalInput]}
+                  placeholder={t("newPasswordPlaceholder")}
+                  placeholderTextColor="#65705F"
+                  secureTextEntry
+                  value={resetNewPassword}
+                  onChangeText={setResetNewPassword}
+                />
+                <TextInput
+                  style={[styles.input, styles.modalInput]}
+                  placeholder={t("confirmPasswordPlaceholder")}
+                  placeholderTextColor="#65705F"
+                  secureTextEntry
+                  value={resetConfirmPassword}
+                  onChangeText={setResetConfirmPassword}
+                />
+
+                <AnimatedButton
+                  title={t("resetPasswordButton")}
+                  onPress={handleResetPassword}
+                  style={styles.modalButton}
+                />
+                <TouchableOpacity
+                  onPress={() => setForgotVisible(false)}
+                  style={styles.cancelButton}
+                >
+                  <Text style={styles.cancelButtonText}>{t("cancel")}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </AnimatedScreen>
@@ -170,7 +276,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.primaryLight,
   },
   flex: {
     flex: 1,
@@ -207,12 +313,13 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#DDD",
+    borderColor: "#AFC7A2",
     borderRadius: 12,
     paddingHorizontal: SPACING.lg,
     paddingVertical: 14,
     fontSize: FONT_SIZES.medium,
     backgroundColor: COLORS.white,
+    color: COLORS.textDark,
   },
   optionsContainer: {
     flexDirection: "row",
@@ -254,6 +361,43 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: FONT_SIZES.normal,
     color: COLORS.primary,
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    padding: SPACING.xxl,
+    backgroundColor: "rgba(28, 49, 19, 0.45)",
+  },
+  modalCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: SPACING.xxl,
+  },
+  modalTitle: {
+    fontSize: FONT_SIZES.xlarge,
+    fontWeight: "bold",
+    color: COLORS.primaryDark,
+    marginBottom: SPACING.sm,
+  },
+  modalSubtitle: {
+    fontSize: FONT_SIZES.normal,
+    color: COLORS.textGray,
+    marginBottom: SPACING.xl,
+  },
+  modalInput: {
+    marginTop: SPACING.md,
+  },
+  modalButton: {
+    marginTop: SPACING.xl,
+  },
+  cancelButton: {
+    alignItems: "center",
+    paddingVertical: SPACING.lg,
+  },
+  cancelButtonText: {
+    color: COLORS.primaryDark,
+    fontSize: FONT_SIZES.medium,
     fontWeight: "bold",
   },
 });

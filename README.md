@@ -1,6 +1,6 @@
 # BeFree
 
-BeFree é um aplicativo mobile desenvolvido para ajudar pessoas a interromper o impulso de apostar, detectando sinais de ansiedade em tempo real através da integração com um smartwatch.
+BeFree é um protótipo acadêmico de apoio à interrupção do impulso de apostar. O aplicativo organiza diário, rede de apoio, privacidade e uma simulação do SOS. A integração física com um smartwatch faz parte das próximas etapas do projeto embarcado.
 
 ## 💡 Sobre o projeto
 
@@ -9,8 +9,8 @@ O projeto nasceu como um trabalho escolar, unindo tecnologia e saúde mental no 
 ## ✨ Funcionalidades
 
 - 📱 Aplicativo mobile multiplataforma (Android/iOS)
-- ⌚ Integração com smartwatch para leitura de sinais de ansiedade
-- 🔔 Alertas e intervenções em momentos de risco
+- ⌚ Painel de configuração e simulação do futuro smartwatch
+- 🔔 Simulação de alerta e intervenção local
 - 💾 Armazenamento local de dados do usuário
 - 🌐 Landing page institucional do projeto
 
@@ -24,19 +24,20 @@ O projeto nasceu como um trabalho escolar, unindo tecnologia e saúde mental no 
 
 ```
 BeFree/
-├── app/            # Código-fonte do aplicativo mobile
-├── landing-page/   # Landing page do projeto
-└── database/       # Configuração e scripts do banco de dados local
+├── src/app/        # Telas e rotas do aplicativo mobile
+├── src/db.js       # SQLite local e migrações
+├── assets/         # Imagens e áudio da simulação
+└── Landing-page/   # Landing page institucional
 ```
 
-> Ajuste esta estrutura conforme a organização real das pastas do repositório.
 
 ## 🔧 Como rodar o projeto
 
 ### Pré-requisitos
 
 - Node.js instalado
-- Expo CLI (`npm install -g expo-cli`)
+- Node.js 22.13 ou superior
+- Expo SDK 57
 
 ### Passos
 
@@ -53,6 +54,10 @@ npm install
 # Inicie o projeto com o Expo
 npx expo start
 ```
+
+As senhas são armazenadas com hash e salt, e o identificador da sessão fica no armazenamento seguro do dispositivo. O SQLite continua sendo local: não há backend remoto.
+
+O botão SOS é uma simulação acadêmica. Ele toca um alerta local por cinco segundos e mostra uma orientação, mas não envia mensagens ou ligações. O painel do relógio salva preferências locais, mas ainda não se comunica com hardware.
 
 ## 👥 Equipe
 

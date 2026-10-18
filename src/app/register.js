@@ -24,7 +24,7 @@ import {
     createUser,
     getUserByEmail,
     initDatabase,
-    setSetting,
+    saveSession,
 } from "../db";
 import { useLanguage } from "../i18n";
 
@@ -80,8 +80,7 @@ export default function RegisterScreen() {
 
       // cria o usuário no banco e salva a sessão
       const userId = await createUser({ name: nameValue, email: emailValue, password });
-      await setSetting("currentUserId", String(userId));
-      await setSetting("currentUserName", nameValue);
+      await saveSession(userId, nameValue);
 
       // manda direto pra tela principal
       router.replace("/home");

@@ -1,5 +1,5 @@
-// essa é a tela de emergência (SOS). quando o usuário clica no botão "ATIVAR SOS",
-// o app toca um som de alerta por 5 segundos e mostra uma mensagem de orientação.
+// essa é a tela de demonstração do SOS. quando o usuário clica no botão,
+// o app toca um som por 5 segundos e mostra uma mensagem de orientação.
 // o som toca mesmo se o celular estiver no silencioso (modo mudo).
 
 import { Ionicons } from "@expo/vector-icons";
@@ -30,7 +30,7 @@ export default function SOS() {
   const stopTimer = useRef(null);
 
   useEffect(() => {
-    // configura o áudio pra tocar mesmo no modo silencioso do celular
+    // configura o áudio da simulação para tocar mesmo no modo silencioso do celular
     setAudioModeAsync({ playsInSilentMode: true });
 
     // limpa o timer se a tela for fechada (pra não dar erro)
@@ -68,7 +68,7 @@ export default function SOS() {
         {
           text: t("activate"),
           onPress: () => {
-            // se o usuário confirmar, toca o som e mostra orientação
+            // se o usuário confirmar, executa a simulação e mostra orientação
             playAlert();
             Alert.alert(
               t("sosActivatedTitle"),

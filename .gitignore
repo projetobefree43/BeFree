@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# ESP32: credenciais locais da rede Wi-Fi
+firmware/wifi_credentials.h

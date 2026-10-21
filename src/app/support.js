@@ -21,10 +21,12 @@ import { ScreenHeader } from "../components/screen-header";
 import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 import {
     deleteContact,
+    getEmergencyContact,
     getContacts,
     getCurrentUserId,
     initDatabase,
     insertContact,
+    saveEmergencyContact,
     updateContact,
 } from "../db";
 import { useLanguage } from "../i18n";
@@ -38,6 +40,8 @@ export default function Support() {
   const [editingContact, setEditingContact] = useState(null);
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
 
   // carrega os contatos salvos quando a tela aparece
   useEffect(() => {
@@ -49,6 +53,11 @@ export default function Support() {
         if (sessionUserId) {
           const rows = await getContacts(sessionUserId);
           setContacts(rows);
+          const emergencyContact = await getEmergencyContact(sessionUserId);
+          if (emergencyContact) {
+            setEmergencyName(emergencyContact.name);
+            setEmergencyPhone(emergencyContact.phone);
+          }
         }
       } catch (error) {
         console.error("Erro ao carregar contatos:", error);
@@ -56,6 +65,26 @@ export default function Support() {
     };
     loadContacts();
   }, []);
+
+  const handleSaveEmergencyContact = async () => {
+    const name = emergencyName.trim();
+    const phone = emergencyPhone.trim();
+
+    if (!name || !phone) {
+      Alert.alert(t("requiredFields"), t("emergencyContactRequiredMessage"));
+      return;
+    }
+
+    try {
+      await initDatabase();
+      if (!userId) return;
+      await saveEmergencyContact(userId, { name, phone });
+      Alert.alert(t("success"), t("emergencyContactSaved"));
+    } catch (error) {
+      console.error("Erro ao salvar contato de emergência:", error);
+      Alert.alert(t("error"), t("emergencyContactSaveError"));
+    }
+  };
 
   // abre o modal pra cadastrar um contato novo
   const openNewContact = () => {
@@ -150,6 +179,46 @@ export default function Support() {
         <ScreenHeader title={t("supportTitle")} onBackPress={() => router.back()} />
         <ScrollView contentContainerStyle={styles.content}>
           <Text style={styles.subtitle}>{t("supportSubtitle")}</Text>
+
+          <View style={styles.emergencyCard}>
+            <View style={styles.emergencyHeader}>
+              <MaterialCommunityIcons
+                name="phone-alert"
+                size={28}
+                color={COLORS.danger}
+              />
+              <View style={styles.emergencyInfo}>
+                <Text style={styles.emergencyTitle}>{t("emergencyContactTitle")}</Text>
+                <Text style={styles.emergencySubtitle}>
+                  {t("emergencyContactSubtitle")}
+                </Text>
+              </View>
+            </View>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder={t("emergencyContactNamePlaceholder")}
+              placeholderTextColor={COLORS.textGray}
+              value={emergencyName}
+              onChangeText={setEmergencyName}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder={t("emergencyContactPhonePlaceholder")}
+              placeholderTextColor={COLORS.textGray}
+              keyboardType="phone-pad"
+              value={emergencyPhone}
+              onChangeText={setEmergencyPhone}
+            />
+            <TouchableOpacity
+              style={styles.emergencySaveButton}
+              onPress={handleSaveEmergencyContact}
+            >
+              <Text style={styles.emergencySaveText}>
+                {t("saveEmergencyContactButton")}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           {/* lista de contatos cadastrados */}
           {contacts.map((contact) => (
@@ -274,6 +343,42 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.medium,
     color: COLORS.textGray,
     marginBottom: SPACING.xl,
+  },
+  emergencyCard: {
+    backgroundColor: COLORS.dangerLight,
+    borderRadius: 16,
+    padding: SPACING.lg,
+    marginBottom: SPACING.xxl,
+  },
+  emergencyHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.lg,
+  },
+  emergencyInfo: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+  emergencyTitle: {
+    fontSize: FONT_SIZES.medium,
+    fontWeight: "bold",
+    color: COLORS.primaryDark,
+  },
+  emergencySubtitle: {
+    fontSize: FONT_SIZES.normal,
+    color: COLORS.textGray,
+    marginTop: SPACING.xs,
+  },
+  emergencySaveButton: {
+    backgroundColor: COLORS.danger,
+    borderRadius: 12,
+    paddingVertical: SPACING.md,
+    alignItems: "center",
+  },
+  emergencySaveText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.normal,
+    fontWeight: "bold",
   },
   contactCard: {
     flexDirection: "row",

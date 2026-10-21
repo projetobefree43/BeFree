@@ -23,6 +23,7 @@ import { COLORS, FONT_SIZES, SPACING } from "../constants/styles";
 import {
   getContacts,
   getCurrentUserId,
+  getEmergencyContact,
   getSetting,
   getWatchSettings,
   initDatabase,
@@ -79,8 +80,11 @@ export default function Watch() {
 
   const abrirContatoDeSeguranca = useCallback(async () => {
     try {
+      const contatoEmergencia = userId
+        ? await getEmergencyContact(userId)
+        : null;
       const contatos = userId ? await getContacts(userId) : [];
-      const contato = contatos[0];
+      const contato = contatoEmergencia || contatos[0];
 
       if (!contato || !contato.phone) {
         Alert.alert(t("helpRequestTitle"), t("noSafetyContactMessage"));

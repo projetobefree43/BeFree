@@ -260,12 +260,13 @@ export async function deleteUser(id) {
   await db.runAsync("DELETE FROM journal_entries WHERE user_id = ?", id);
   await db.runAsync("DELETE FROM support_contacts WHERE user_id = ?", id);
   await db.runAsync(
-    "DELETE FROM settings WHERE key IN (?, ?, ?, ?, ?)",
+    "DELETE FROM settings WHERE key IN (?, ?, ?, ?, ?, ?)",
     `watch.notifications.${id}`,
     `watch.vibration.${id}`,
     "currentUserId",
     "currentUserName",
-    `privacy.hideName.${id}`
+    `privacy.hideName.${id}`,
+    `emergencyContact.${id}`
   );
   await db.runAsync("DELETE FROM users WHERE id = ?", id);
 }
@@ -455,6 +456,40 @@ export async function deleteContact(id, userId) {
     "DELETE FROM support_contacts WHERE id = ? AND user_id = ?",
     id,
     userId
+  );
+}
+
+// busca o contato de emergência definido pelo usuário
+export async function getEmergencyContact(userId) {
+  if (!userId) return null;
+
+  const raw = await getSetting(`emergencyContact.${userId}`);
+  if (!raw) return null;
+
+  try {
+    const contact = JSON.parse(raw);
+    if (!contact?.name || !contact?.phone) return null;
+    return { name: contact.name, phone: contact.phone };
+  } catch {
+    return null;
+  }
+}
+
+// salva o contato de emergência sem alterar a estrutura do SQLite
+export async function saveEmergencyContact(userId, { name, phone }) {
+  if (!userId) throw new Error("USER_NOT_FOUND");
+
+  const cleanName = String(name ?? "").trim();
+  const cleanPhone = String(phone ?? "").trim();
+
+  if (!cleanName || !cleanPhone) {
+    await removeSetting(`emergencyContact.${userId}`);
+    return;
+  }
+
+  await setSetting(
+    `emergencyContact.${userId}`,
+    JSON.stringify({ name: cleanName, phone: cleanPhone })
   );
 }
 

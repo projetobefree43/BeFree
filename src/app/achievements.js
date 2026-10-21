@@ -40,6 +40,36 @@ export default function Achievements() {
       description: "30 dias de vitórias",
       descriptionKey: "championAchievementDesc",
     },
+    {
+      id: 4,
+      icon: "book-check",
+      titleKey: "journalAchievementTitle",
+      descriptionKey: "journalAchievementDesc",
+    },
+    {
+      id: 5,
+      icon: "heart-pulse",
+      titleKey: "selfCareAchievementTitle",
+      descriptionKey: "selfCareAchievementDesc",
+    },
+    {
+      id: 6,
+      icon: "account-heart",
+      titleKey: "supportAchievementTitle",
+      descriptionKey: "supportAchievementDesc",
+    },
+    {
+      id: 7,
+      icon: "shield-check",
+      titleKey: "safeConnectionAchievementTitle",
+      descriptionKey: "safeConnectionAchievementDesc",
+    },
+    {
+      id: 8,
+      icon: "weather-sunny",
+      titleKey: "newBeginningAchievementTitle",
+      descriptionKey: "newBeginningAchievementDesc",
+    },
   ];
 
   return (
